@@ -42,10 +42,14 @@
         <script>
             var scene = new THREE.Scene();
             var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+            camera.position.z = 5;
 
             var renderer = new THREE.WebGLRenderer();
             renderer.setSize( window.innerWidth, window.innerHeight );
             document.body.appendChild( renderer.domElement );
+            renderer.domElement.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+            })
 
             function animate() {
                 requestAnimationFrame( animate );
@@ -54,6 +58,22 @@
                 renderer.render( scene, camera );
             }
             animate();
+            // with help from https://threejs.org/docs/#api/en/core/Raycaster
+            var raycaster = new THREE.Raycaster();
+            var mouseMovement = new THREE.Vector2();
+            let mousePos = new THREE.Vector2();
+            function onMouseMove( event ) {
+                mouseMovement.x = event.movementX * (1/600);
+                mouseMovement.y = event.movementY * (1/600);
+
+                mousePos.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+                mousePos.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+                if (event.buttons != 0){
+                    camera.rotation.y -= mouseMovement.x;
+                    camera.rotation.x -= mouseMovement.y;
+                }
+            }
+
         </script>
 	</body>
 </html>
