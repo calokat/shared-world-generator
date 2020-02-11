@@ -117,6 +117,18 @@
                 entities.push(mesh);
                 scene.add(mesh);
             }
+
+            document.querySelector("#cubeBtn").addEventListener('click', () => {
+                addEntity(boxGeometry);
+            })
+
+            document.querySelector("#coneBtn").addEventListener('click', () => {
+                addEntity(coneGeometry);
+            })
+
+            document.querySelector("#cylinderBtn").addEventListener('click', () => {
+                addEntity(cylinderGeometry);
+            })
         </script>
 	</body>
 </html>
