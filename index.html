@@ -58,6 +58,16 @@
                 renderer.render( scene, camera );
             }
             animate();
+
+            let entities = [];
+            
+            var boxGeometry = new THREE.BoxGeometry( 1, 1, 1 );
+            let coneGeometry = new THREE.ConeGeometry(1, 1, 20);
+            let cylinderGeometry = new THREE.CylinderGeometry(1, 1, 1, 20);
+            var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+            entities.push(new THREE.Mesh(boxGeometry, material));
+            scene.add( entities[0] );
+
             // with help from https://threejs.org/docs/#api/en/core/Raycaster
             var raycaster = new THREE.Raycaster();
             var mouseMovement = new THREE.Vector2();
