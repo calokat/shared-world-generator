@@ -129,6 +129,29 @@
             document.querySelector("#cylinderBtn").addEventListener('click', () => {
                 addEntity(cylinderGeometry);
             })
+
+            let selected;
+            let selectedOutline;
+            renderer.domElement.addEventListener('click', () => {
+                scene.remove(selectedOutline);
+                raycaster.setFromCamera(mousePos, camera);
+                let intersects = raycaster.intersectObjects(scene.children);
+                if (intersects.length == 0)
+                {
+                    selected = null;
+                    return;
+                }
+                selected = intersects[0].object;
+                selectedOutline = new THREE.LineSegments(selected.geometry, new THREE.LineBasicMaterial({
+                    color: 0xffffff,
+                    linewidth: 1,
+                    linecap: 'round', //ignored by WebGLRenderer
+                    linejoin:  'round' //ignored by WebGLRenderer
+                }));
+                // selectedOutline.position = selected.object.position;
+                selectedOutline.position.copy(selected.position);
+                scene.add(selectedOutline);
+            })
         </script>
 	</body>
 </html>
