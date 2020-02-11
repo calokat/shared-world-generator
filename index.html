@@ -84,6 +84,29 @@
                 }
             }
             window.addEventListener('mousemove', onMouseMove);
+
+            function moveCamera(e){
+                var cameraFwd = new THREE.Vector3();
+                var cameraRight = new THREE.Vector3();
+                camera.getWorldDirection(cameraFwd);
+                cameraRight.crossVectors(new THREE.Vector3(0, 1, 0), cameraFwd);
+                let cameraUp = new THREE.Vector3();
+                cameraUp.crossVectors(cameraRight, cameraFwd);
+                cameraUp.crossVectors(cameraFwd, cameraRight);
+                if (e.key == "w"){
+                    camera.position = camera.position.add(cameraFwd.multiplyScalar(.1));
+                }
+                if (e.key == "s"){
+                    camera.position = camera.position.add(cameraFwd.multiplyScalar(-.1));
+                }
+                if (e.key == "a"){
+                    camera.position = camera.position.add(cameraRight.multiplyScalar(.1));
+                }
+                if (e.key == "d"){
+                    camera.position = camera.position.add(cameraRight.multiplyScalar(-.1));
+                }
+            }
+            window.addEventListener('keydown', moveCamera);
         </script>
 	</body>
 </html>
