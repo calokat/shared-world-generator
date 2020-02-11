@@ -107,6 +107,16 @@
                 }
             }
             window.addEventListener('keydown', moveCamera);
+
+            function addEntity(geometry) {
+                let cameraFwd = new THREE.Vector3();
+                let mesh = new THREE.Mesh(geometry, material);
+                // let camPos = camera.position.clone();
+                mesh.position.add(camera.position).add(camera.getWorldDirection(cameraFwd).multiplyScalar(5));
+                // camPos.add(camera.getWorldDirection(cameraFwd).multiplyScalar(5)).copy(mesh.position);
+                entities.push(mesh);
+                scene.add(mesh);
+            }
         </script>
 	</body>
 </html>
