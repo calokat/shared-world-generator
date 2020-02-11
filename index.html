@@ -152,6 +152,14 @@
                 selectedOutline.position.copy(selected.position);
                 scene.add(selectedOutline);
             })
+
+            window.addEventListener('keydown', (e) => {
+                switch (e.key) {
+                    case 'Delete':
+                        scene.remove(selected);
+                        scene.remove(selectedOutline);
+                }
+            })
         </script>
 	</body>
 </html>
