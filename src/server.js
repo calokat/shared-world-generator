@@ -11,6 +11,12 @@ const onRequest = (request, response) => {
         case '/engine':
             fileHandler.getEngine(request, response);
             break;
+        case '/index.js':
+            fileHandler.getIndexJs(request, response);
+            break;
+        case '/three.js':
+            fileHandler.getThreeJs(request, response);
+            break;
         default:
             fileHandler.getIndex(request, response);
             break;
