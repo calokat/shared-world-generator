@@ -29,16 +29,40 @@
 		</style>
     </head>
 	<body>
-        <header>Shared World Generator</header>
+        <header>
+            Shared World Generator
+        </header>
         <div class="sidepanel">
-            <button type="button" class="btn btn-light" id="cubeBtn">Cube</button>
-            <button type="button" class="btn btn-light" id="coneBtn">Cone</button>
-            <button type="button" class="btn btn-light" id="cylinderBtn">Cylinder</button>
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col">
+                        <button class="btn btn-primary" id = "saveBtn">Save</button>
+                    </div>
+                    <div class="col">
+                        <p id="guid">ID: Unidentified</p>
+                    </div>
+                </div>
+                <div class="row">
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <button type="button" class="btn btn-light" id="cubeBtn">Cube</button>
+                    </div>
+                    <div class="col">
+                        <button type="button" class="btn btn-light" id="coneBtn">Cone</button>
+                    </div>
+                    <div class="col">
+                        <button type="button" class="btn btn-light" id="cylinderBtn">Cylinder</button>
+                    </div>
+                </div>
+                <!-- <button type="button" class="btn btn-light" id="coneBtn">Cone</button> -->
+                <!-- <button type="button" class="btn btn-light" id="cylinderBtn">Cylinder</button> -->
+            </div>
         </div>
         <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
-        <script src="js/three.js"></script>
+        <script src="/three.js"></script>
         <script>
             var scene = new THREE.Scene();
             var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
@@ -53,8 +77,6 @@
 
             function animate() {
                 requestAnimationFrame( animate );
-                // entities[0].rotation.x += 0.01;
-                // cube.rotation.y += 0.01;
                 renderer.render( scene, camera );
             }
             animate();
@@ -65,8 +87,8 @@
             let coneGeometry = new THREE.ConeGeometry(1, 1, 20);
             let cylinderGeometry = new THREE.CylinderGeometry(1, 1, 1, 20);
             var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-            entities.push(new THREE.Mesh(boxGeometry, material));
-            scene.add( entities[0] );
+            // entities.push(new THREE.Mesh(boxGeometry, material));
+            // scene.add( entities[0] );
 
             // with help from https://threejs.org/docs/#api/en/core/Raycaster
             var raycaster = new THREE.Raycaster();
@@ -108,26 +130,27 @@
             }
             window.addEventListener('keydown', moveCamera);
 
-            function addEntity(geometry) {
+            function addEntity(geometry, newName) {
                 let cameraFwd = new THREE.Vector3();
                 let mesh = new THREE.Mesh(geometry, material);
                 // let camPos = camera.position.clone();
                 mesh.position.add(camera.position).add(camera.getWorldDirection(cameraFwd).multiplyScalar(5));
+                mesh.name = newName;
                 // camPos.add(camera.getWorldDirection(cameraFwd).multiplyScalar(5)).copy(mesh.position);
                 entities.push(mesh);
                 scene.add(mesh);
             }
 
             document.querySelector("#cubeBtn").addEventListener('click', () => {
-                addEntity(boxGeometry);
+                addEntity(boxGeometry, "Cube");
             })
 
             document.querySelector("#coneBtn").addEventListener('click', () => {
-                addEntity(coneGeometry);
+                addEntity(coneGeometry, "Cone");
             })
 
             document.querySelector("#cylinderBtn").addEventListener('click', () => {
-                addEntity(cylinderGeometry);
+                addEntity(cylinderGeometry, "Cylinder");
             })
 
             let selected;
@@ -178,6 +201,41 @@
             var gridHelper = new THREE.GridHelper( size, divisions );
             scene.add( gridHelper );
 
+            document.querySelector("#saveBtn").addEventListener('click', (e) => {
+                let entitiesStr = JSON.stringify(getSimplifiedEntities());
+                let xhr = new XMLHttpRequest();
+                xhr.open('POST', '/addOrUpdateScene');
+                xhr.send(entitiesStr);
+            })
+
+            window.onload = () => {
+                let isNew = window.location.href.split('?')[1].split('=')[1];
+                if (isNew == "true") {
+                    document.querySelector('#guid').innerHTML = "ID: " + getNewId();
+                }
+            }
+
+            function getNewId() {
+                let xhr = new XMLHttpRequest();
+                xhr.open('GET', '/new');
+                xhr.onload = () => {
+                    console.log(xhr.responseText);
+                    document.querySelector('#guid').innerHTML = "ID: " + xhr.responseText;
+                }
+                xhr.send();
+            }
+
+            function getSimplifiedEntities() {
+                let simplified = [];
+                entities.forEach((ent) => {
+                    let simpleObj = {};
+                    simpleObj.name = ent.name;
+                    simple.color = ent.material.color;
+                    simple.position = ent.position;
+                    simple.rotation = ent.rotation;
+                    simplified.push(simpleObj);
+                })
+            }
         </script>
 	</body>
 </html>
