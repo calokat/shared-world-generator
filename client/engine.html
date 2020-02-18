@@ -207,23 +207,21 @@
                 xhr.open('POST', '/addOrUpdateScene');
                 xhr.send(entitiesStr);
             })
-
+            let id = "";
             window.onload = () => {
-                let isNew = window.location.href.split('?')[1].split('=')[1];
-                if (isNew == "true") {
-                    document.querySelector('#guid').innerHTML = "ID: " + getNewId();
-                }
+                id = window.location.href.split('?')[1].split('=')[1];
+                document.querySelector('#guid').innerHTML = "ID: " + id;
             }
 
-            function getNewId() {
-                let xhr = new XMLHttpRequest();
-                xhr.open('GET', '/new');
-                xhr.onload = () => {
-                    console.log(xhr.responseText);
-                    document.querySelector('#guid').innerHTML = "ID: " + xhr.responseText;
-                }
-                xhr.send();
-            }
+            // function getNewId() {
+            //     let xhr = new XMLHttpRequest();
+            //     xhr.open('GET', '/new');
+            //     xhr.onload = () => {
+            //         console.log(xhr.responseText);
+            //         document.querySelector('#guid').innerHTML = "ID: " + xhr.responseText;
+            //     }
+            //     xhr.send();
+            // }
 
             function getSimplifiedEntities() {
                 let simplified = [];
