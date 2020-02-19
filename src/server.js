@@ -22,6 +22,12 @@ const onRequest = (request, response) => {
     case '/new':
         sceneHandler.getNewId(request, response);
         break;
+    case '/addOrUpdateScene':
+        sceneHandler.addOrUpdateScene(request, response);
+        break;
+    case '/getScene':
+        sceneHandler.getScene(request, response);
+        break;
     default:
         fileHandler.getIndex(request, response);
         break;
