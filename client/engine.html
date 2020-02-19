@@ -54,20 +54,23 @@
                     <div class="col">
                         <button type="button" class="btn btn-light" id="cylinderBtn">Cylinder</button>
                     </div>
+                    <div class="col">
+                        <label for="colorInput">Color: </label>
+                        <input type="color" id="colorInput">
+                    </div>
                 </div>
                 <!-- <button type="button" class="btn btn-light" id="coneBtn">Cone</button> -->
                 <!-- <button type="button" class="btn btn-light" id="cylinderBtn">Cylinder</button> -->
             </div>
         </div>
-        <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+        <!-- <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script> -->
         <script src="/three.js"></script>
         <script>
             var scene = new THREE.Scene();
-            var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+            var camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 1000 );
             camera.position.z = 5;
-
             var renderer = new THREE.WebGLRenderer();
             renderer.setSize( window.innerWidth, window.innerHeight );
             document.body.appendChild( renderer.domElement );
@@ -192,6 +195,8 @@
                     case 'Delete':
                         scene.remove(selected);
                         scene.remove(selectedOutline);
+                        let indexToRemove = entities.indexOf(selected);
+                        entities.splice(indexToRemove, 1);
                 }
             })
 
@@ -205,14 +210,52 @@
                 let entitiesStr = JSON.stringify(getSimplifiedEntities());
                 let xhr = new XMLHttpRequest();
                 xhr.open('POST', '/addOrUpdateScene');
-                xhr.send(entitiesStr);
+                xhr.send(`id=${id}&scene=${entitiesStr}`);
             })
             let id = "";
             window.onload = () => {
                 id = window.location.href.split('?')[1].split('=')[1];
                 document.querySelector('#guid').innerHTML = "ID: " + id;
+                // get the scene from the server, if it exists
+                let xhr = new XMLHttpRequest();
+                xhr.open('GET', `/getScene?id=${id}`);
+                xhr.onload = () => {
+                    if (xhr.status == 200) {
+                        let scene = JSON.parse(xhr.response);
+                        console.log("About to parse");
+                        parseScene(scene);
+                    }
+                }
+                xhr.send();
+                console.log(document.querySelector("#colorInput").value);
             }
 
+            function parseScene(sceneObj) {
+                for (let entity of sceneObj) {
+                    let geometry;
+                    switch (entity.name) {
+                        case 'Cube':
+                            geometry = boxGeometry;
+                            break;
+                        case 'Cone':
+                            geometry = coneGeometry;
+                            break;
+                        case 'Cylinder':
+                            geometry = cylinderGeometry;
+                            break;
+                    }
+                    let color = entity.color;
+                    let material = new THREE.MeshBasicMaterial({color});
+                    let mesh = new THREE.Mesh(geometry, material);
+                    mesh.position.x = entity.position.x;
+                    mesh.position.y = entity.position.y;
+                    mesh.position.z = entity.position.z;
+                    // mesh.rotation = entity.rotation.clone();
+                    scene.add(mesh);
+                    console.log("Added mesh: " + mesh);
+                    entities.push(mesh);
+                }
+            }
             // function getNewId() {
             //     let xhr = new XMLHttpRequest();
             //     xhr.open('GET', '/new');
@@ -228,11 +271,21 @@
                 entities.forEach((ent) => {
                     let simpleObj = {};
                     simpleObj.name = ent.name;
-                    simple.color = ent.material.color;
-                    simple.position = ent.position;
-                    simple.rotation = ent.rotation;
+                    simpleObj.color = ent.material.color;
+                    simpleObj.position = ent.position;
+                    simpleObj.rotation = ent.rotation;
                     simplified.push(simpleObj);
                 })
+                return simplified;
+            }
+            let colorInput = document.querySelector("#colorInput");
+            colorInput.onchange = () => {
+                if (selected) {
+                    let colorNumber = Number.parseInt(colorInput.value.replace("#", "0x"), 16);
+                    console.log(colorNumber);
+                    let newColor = new THREE.Color(colorNumber);
+                    selected.material = new THREE.MeshBasicMaterial({color: newColor});
+                }
             }
         </script>
 	</body>
