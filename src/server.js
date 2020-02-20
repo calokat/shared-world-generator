@@ -16,7 +16,7 @@ const onRequest = (request, response) => {
     case '/index.js':
         fileHandler.getIndexJs(request, response);
         break;
-    case '/three.js':
+    case '/three.module.js':
         fileHandler.getThreeJs(request, response);
         break;
     case '/new':
@@ -27,6 +27,12 @@ const onRequest = (request, response) => {
         break;
     case '/getScene':
         sceneHandler.getScene(request, response);
+        break;
+    case '/engine.js':
+        fileHandler.getEngineJs(request, response);
+        break;
+    case '/TransformControls.js':
+        fileHandler.getTransformControlsJs(request, response);
         break;
     default:
         fileHandler.getIndex(request, response);
