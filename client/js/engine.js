@@ -32,7 +32,14 @@ var mouseMovement = new THREE.Vector2();
 let mousePos = new THREE.Vector2();
 
 let controls = new TransformControls(camera, renderer.domElement);
+controls.name = "TransformControls";
 scene.add(controls);
+controls.addEventListener('objectChange',  () => {
+    selectedOutline.position.set(selected.position.x, selected.position.y, selected.position.z);
+    selectedOutline.rotation.copy(selected.rotation);
+    selectedOutline.scale.copy(selected.scale);
+});
+
 function onMouseMove( event ) {
     mouseMovement.x = event.movementX * (1/600);
     mouseMovement.y = event.movementY * (1/600);
@@ -94,13 +101,18 @@ document.querySelector("#cylinderBtn").addEventListener('click', () => {
 
 let selected;
 let selectedOutline;
-renderer.domElement.addEventListener('click', () => {
-    scene.remove(selectedOutline);
+renderer.domElement.addEventListener('mousedown', (e) => {
+    if (e.button == 2) {
+        return;
+    }
     raycaster.setFromCamera(mousePos, camera);
     let intersects = raycaster.intersectObjects(scene.children);
     if (intersects.length == 0)
     {
         selected = null;
+        scene.remove(selectedOutline);
+        selectedOutline = null;
+        controls.detach();
         return;
     }
     let hitMesh = false;
@@ -110,6 +122,9 @@ renderer.domElement.addEventListener('click', () => {
             hitMesh = true;
             selected = intersects[firstMeshIndex].object;
             controls.attach(selected);
+            if (selectedOutline) {
+                scene.remove(selectedOutline);
+            }
             selectedOutline = new THREE.LineSegments(selected.geometry, new THREE.LineBasicMaterial({
                 color: 0xffffff,
                 linewidth: 1,
@@ -118,31 +133,44 @@ renderer.domElement.addEventListener('click', () => {
             }));
             // selectedOutline.position = selected.object.position;
             selectedOutline.position.copy(selected.position);
-            selected.add(selectedOutline);
-            scene.add(selectedOutline);
+            if (!selected.children.includes(selectedOutline)) {
+                selected.add(selectedOutline);            
+            }
+            if (!scene.children.includes(selectedOutline)) {
+                scene.add(selectedOutline);
+            }
             return;
         }
-    }
-    if (!hitMesh){
-        selected = null;
     }
 })
 
 window.addEventListener('keydown', (e) => {
     switch (e.key) {
         case 'Delete':
+            controls.detach();
             scene.remove(selected);
             scene.remove(selectedOutline);
+            selectedOutline = null;
             let indexToRemove = entities.indexOf(selected);
             entities.splice(indexToRemove, 1);
+            break;
+        case 'w':
+            controls.mode = "translate";
+            break;
+        case 'e':
+            controls.mode = "rotate";
+            break;
+        case 'r':
+            controls.mode = "scale";
+            break;
     }
 })
 
 // create grid, with help from https://threejs.org/docs/index.html#api/en/helpers/GridHelper
 var size = 10;
 var divisions = 10;
-var gridHelper = new THREE.GridHelper( size, divisions );
-scene.add( gridHelper );
+// var gridHelper = new THREE.GridHelper( size, divisions );
+// scene.add( gridHelper );
 
 document.querySelector("#saveBtn").addEventListener('click', (e) => {
     let entitiesStr = JSON.stringify(getSimplifiedEntities());
@@ -188,6 +216,9 @@ function parseScene(sceneObj) {
         mesh.position.x = entity.position.x;
         mesh.position.y = entity.position.y;
         mesh.position.z = entity.position.z;
+        mesh.rotation.copy(entity.rotation);
+        mesh.scale.copy(entity.scale);
+        mesh.name = entity.name;
         // mesh.rotation = entity.rotation.clone();
         scene.add(mesh);
         console.log("Added mesh: " + mesh);
@@ -212,6 +243,7 @@ function getSimplifiedEntities() {
         simpleObj.color = ent.material.color;
         simpleObj.position = ent.position;
         simpleObj.rotation = ent.rotation;
+        simpleObj.scale = ent.scale;
         simplified.push(simpleObj);
     })
     return simplified;
