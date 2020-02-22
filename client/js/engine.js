@@ -3,7 +3,9 @@ import {TransformControls} from '/TransformControls.js';
 
 var scene = new THREE.Scene();
 var camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 1000 );
+camera.position.y = 5;
 camera.position.z = 5;
+camera.rotation.set(-Math.PI / 4, 0, 0, 'XYZ');
 var renderer = new THREE.WebGLRenderer();
 renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
@@ -105,6 +107,7 @@ renderer.domElement.addEventListener('mousedown', (e) => {
     if (e.button == 2) {
         return;
     }
+    scene.remove(gridHelper);
     raycaster.setFromCamera(mousePos, camera);
     let intersects = raycaster.intersectObjects(scene.children);
     if (intersects.length == 0)
@@ -113,6 +116,7 @@ renderer.domElement.addEventListener('mousedown', (e) => {
         scene.remove(selectedOutline);
         selectedOutline = null;
         controls.detach();
+        scene.add(gridHelper);
         return;
     }
     let hitMesh = false;
@@ -139,9 +143,10 @@ renderer.domElement.addEventListener('mousedown', (e) => {
             if (!scene.children.includes(selectedOutline)) {
                 scene.add(selectedOutline);
             }
-            return;
+            break;
         }
     }
+    scene.add(gridHelper);
 })
 
 window.addEventListener('keydown', (e) => {
@@ -169,8 +174,8 @@ window.addEventListener('keydown', (e) => {
 // create grid, with help from https://threejs.org/docs/index.html#api/en/helpers/GridHelper
 var size = 10;
 var divisions = 10;
-// var gridHelper = new THREE.GridHelper( size, divisions );
-// scene.add( gridHelper );
+var gridHelper = new THREE.GridHelper( size, divisions );
+scene.add( gridHelper );
 
 document.querySelector("#saveBtn").addEventListener('click', (e) => {
     let entitiesStr = JSON.stringify(getSimplifiedEntities());
@@ -249,7 +254,7 @@ function getSimplifiedEntities() {
     return simplified;
 }
 let colorInput = document.querySelector("#colorInput");
-colorInput.onchange = () => {
+colorInput.oninput = () => {
     if (selected) {
         let colorNumber = Number.parseInt(colorInput.value.replace("#", "0x"), 16);
         console.log(colorNumber);
