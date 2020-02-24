@@ -64,16 +64,16 @@ function moveCamera(e){
     cameraUp.crossVectors(cameraRight, cameraFwd);
     cameraUp.crossVectors(cameraFwd, cameraRight);
     if (e.key == "w"){
-        camera.position = camera.position.add(cameraFwd.multiplyScalar(.1));
+        camera.position.add(cameraFwd.multiplyScalar(.1));
     }
     if (e.key == "s"){
-        camera.position = camera.position.add(cameraFwd.multiplyScalar(-.1));
+        camera.position.add(cameraFwd.multiplyScalar(-.1));
     }
     if (e.key == "a"){
-        camera.position = camera.position.add(cameraRight.multiplyScalar(.1));
+        camera.position.add(cameraRight.multiplyScalar(.1));
     }
     if (e.key == "d"){
-        camera.position = camera.position.add(cameraRight.multiplyScalar(-.1));
+        camera.position.add(cameraRight.multiplyScalar(-.1));
     }
 }
 window.addEventListener('keydown', moveCamera);
@@ -137,6 +137,8 @@ renderer.domElement.addEventListener('mousedown', (e) => {
             }));
             // selectedOutline.position = selected.object.position;
             selectedOutline.position.copy(selected.position);
+            selectedOutline.rotation.copy(selected.rotation);
+            selectedOutline.scale.copy(selected.scale);
             if (!selected.children.includes(selectedOutline)) {
                 selected.add(selectedOutline);            
             }
