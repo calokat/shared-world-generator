@@ -1,3 +1,31 @@
+import * as THREE from '/three.module.js';
+
+var scene = new THREE.Scene();
+var camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 1000 );
+camera.position.y = 5;
+camera.position.z = 5;
+camera.rotation.set(-Math.PI / 4, 0, 0, 'XYZ');
+var renderer = new THREE.WebGLRenderer();
+renderer.setSize( window.innerWidth, window.innerHeight );
+document.body.appendChild( renderer.domElement );
+renderer.domElement.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+})
+
+function animate() {
+    requestAnimationFrame( animate );
+    renderer.render( scene, camera );
+}
+animate();
+
+
+// create grid, with help from https://threejs.org/docs/index.html#api/en/helpers/GridHelper
+var size = 10;
+var divisions = 10;
+var gridHelper = new THREE.GridHelper( size, divisions );
+scene.add( gridHelper );
+
+
 let newWorldBtn = document.querySelector('#newWorld');
 let enterWorldBtn = document.querySelector("#enterWorld");
 let idField = document.querySelector("#idField");
