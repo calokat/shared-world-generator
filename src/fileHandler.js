@@ -39,12 +39,11 @@ const getTransformControlsJs = (request, response) => {
 };
 
 
-
 module.exports = {
   getIndex,
   getEngine,
   getIndexJs,
   getThreeJs,
   getEngineJs,
-  getTransformControlsJs
+  getTransformControlsJs,
 };
