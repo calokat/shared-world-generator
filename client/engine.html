@@ -3,6 +3,7 @@
 	<head>
 		<meta charset="utf-8">
         <title>My first three.js app</title>
+        <link href="https://fonts.googleapis.com/css?family=Odibee+Sans&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
         <style>
             /*With help from https://www.w3schools.com/howto/howto_js_collapse_sidepanel.asp*/
@@ -26,12 +27,19 @@
             header {
                 padding-left: 250px;
             }
+            header {
+            background-color: black;
+            color: aqua;
+            font-family: 'Odibee Sans';
+            font-size: 32px;
+            text-align: center;
+            }
 		</style>
     </head>
 	<body>
-        <!-- <header>
+        <header>
             Shared World Generator
-        </header> -->
+        </header>
         <div class="sidepanel">
             <div class="container-fluid">
                 <div class="row">
@@ -42,23 +50,12 @@
                         <p id="guid">ID: Unidentified</p>
                     </div>
                 </div>
-                <div class="row">
-                </div>
-                <div class="row">
-                    <div class="col">
-                        <button type="button" class="btn btn-light" id="cubeBtn">Cube</button>
-                    </div>
-                    <div class="col">
-                        <button type="button" class="btn btn-light" id="coneBtn">Cone</button>
-                    </div>
-                    <div class="col">
-                        <button type="button" class="btn btn-light" id="cylinderBtn">Cylinder</button>
-                    </div>
-                    <div class="col">
-                        <label for="colorInput">Color: </label>
-                        <input type="color" id="colorInput">
-                    </div>
-                </div>
+                <button type="button" class="btn btn-light" id="cubeBtn">Cube</button>
+                <button type="button" class="btn btn-light" id="coneBtn">Cone</button>
+                <button type="button" class="btn btn-light" id="cylinderBtn">Cylinder</button>
+                <br />
+                <label for="colorInput">Color: </label>
+                <input type="color" id="colorInput">
                 <!-- <button type="button" class="btn btn-light" id="coneBtn">Cone</button> -->
                 <!-- <button type="button" class="btn btn-light" id="cylinderBtn">Cylinder</button> -->
             </div>
