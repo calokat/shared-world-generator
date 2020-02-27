@@ -1,6 +1,7 @@
 import * as THREE from '/three.module.js';
+// From https://discourse.threejs.org/t/transformcontrols-rotation-is-not-working/7519/5
 import {TransformControls} from '/TransformControls.js';
-
+// set up the scene, camera, and renderer
 var scene = new THREE.Scene();
 var camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 1000 );
 camera.position.y = 5;
@@ -9,24 +10,24 @@ camera.rotation.set(-Math.PI / 4, 0, 0, 'XYZ');
 var renderer = new THREE.WebGLRenderer();
 renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
+// prevent the right click menu from showing up on the canvas
 renderer.domElement.addEventListener('contextmenu', (e) => {
     e.preventDefault();
 })
-
+// basic update loop
 function animate() {
     requestAnimationFrame( animate );
     renderer.render( scene, camera );
 }
 animate();
-
+// holds all of the entities in the scene
 let entities = [];
-
+// variables that hold various geometry. Used when instantiating the entities.
 var boxGeometry = new THREE.BoxGeometry( 1, 1, 1 );
 let coneGeometry = new THREE.ConeGeometry(1, 1, 20);
 let cylinderGeometry = new THREE.CylinderGeometry(1, 1, 1, 20);
+// the basic (unlit) material all shapes have. Green is the default, though that can be changed.
 var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-// entities.push(new THREE.Mesh(boxGeometry, material));
-// scene.add( entities[0] );
 
 // with help from https://threejs.org/docs/#api/en/core/Raycaster
 var raycaster = new THREE.Raycaster();
@@ -35,13 +36,14 @@ let mousePos = new THREE.Vector2();
 
 let controls = new TransformControls(camera, renderer.domElement);
 controls.name = "TransformControls";
+// the TransformControls only show up when attached to an object
 scene.add(controls);
 controls.addEventListener('objectChange',  () => {
     selectedOutline.position.set(selected.position.x, selected.position.y, selected.position.z);
     selectedOutline.rotation.copy(selected.rotation);
     selectedOutline.scale.copy(selected.scale);
 });
-
+// updates mousePos. If a mouse button is held down, track the mouse movement to rotate the camera accordingly
 function onMouseMove( event ) {
     mouseMovement.x = event.movementX * (1/600);
     mouseMovement.y = event.movementY * (1/600);
@@ -55,14 +57,13 @@ function onMouseMove( event ) {
 }
 window.addEventListener('mousemove', onMouseMove);
 
+// moves the camera based on WASD input.
 function moveCamera(e){
     var cameraFwd = new THREE.Vector3();
     var cameraRight = new THREE.Vector3();
     camera.getWorldDirection(cameraFwd);
+    // Camera knows its forward, we cross product that with the up vector to get the right vector
     cameraRight.crossVectors(new THREE.Vector3(0, 1, 0), cameraFwd);
-    let cameraUp = new THREE.Vector3();
-    cameraUp.crossVectors(cameraRight, cameraFwd);
-    cameraUp.crossVectors(cameraFwd, cameraRight);
     if (e.key == "w"){
         camera.position.add(cameraFwd.multiplyScalar(.1));
     }
@@ -78,13 +79,12 @@ function moveCamera(e){
 }
 window.addEventListener('keydown', moveCamera);
 
+// this occurs whenever any of the 'Box', 'Cone', or 'Cylinder' buttons are pressed
 function addEntity(geometry, newName) {
     let cameraFwd = new THREE.Vector3();
     let mesh = new THREE.Mesh(geometry, material);
-    // let camPos = camera.position.clone();
     mesh.position.add(camera.position).add(camera.getWorldDirection(cameraFwd).multiplyScalar(5));
     mesh.name = newName;
-    // camPos.add(camera.getWorldDirection(cameraFwd).multiplyScalar(5)).copy(mesh.position);
     entities.push(mesh);
     scene.add(mesh);
 }
@@ -102,14 +102,19 @@ document.querySelector("#cylinderBtn").addEventListener('click', () => {
 })
 
 let selected;
+// white wireframe of selected
 let selectedOutline;
 renderer.domElement.addEventListener('mousedown', (e) => {
+    // ignore if right mouse button was pressed
     if (e.button == 2) {
         return;
     }
+    // removing the grid might help with raycasting
     scene.remove(gridHelper);
+    // with help from https://threejs.org/docs/#api/en/core/Raycaster
     raycaster.setFromCamera(mousePos, camera);
     let intersects = raycaster.intersectObjects(scene.children);
+    // if nothing is hit, remove selectedOutline, detach the controls, and add back gridHelper
     if (intersects.length == 0)
     {
         selected = null;
@@ -119,23 +124,21 @@ renderer.domElement.addEventListener('mousedown', (e) => {
         scene.add(gridHelper);
         return;
     }
-    let hitMesh = false;
     let firstMeshIndex = 0;
     for (; firstMeshIndex < intersects.length; ++firstMeshIndex){
         if (intersects[firstMeshIndex].object.type == "Mesh"){
-            hitMesh = true;
             selected = intersects[firstMeshIndex].object;
             controls.attach(selected);
             if (selectedOutline) {
                 scene.remove(selectedOutline);
             }
+            // with the help of https://threejs.org/docs/#api/en/materials/LineBasicMaterial
             selectedOutline = new THREE.LineSegments(selected.geometry, new THREE.LineBasicMaterial({
                 color: 0xffffff,
                 linewidth: 1,
                 linecap: 'round', //ignored by WebGLRenderer
                 linejoin:  'round' //ignored by WebGLRenderer
             }));
-            // selectedOutline.position = selected.object.position;
             selectedOutline.position.copy(selected.position);
             selectedOutline.rotation.copy(selected.rotation);
             selectedOutline.scale.copy(selected.scale);
@@ -148,6 +151,7 @@ renderer.domElement.addEventListener('mousedown', (e) => {
             break;
         }
     }
+    // add back the grid no matter what happens
     scene.add(gridHelper);
 })
 
@@ -186,6 +190,7 @@ document.querySelector("#saveBtn").addEventListener('click', (e) => {
     xhr.send(`id=${id}&scene=${entitiesStr}`);
 })
 let id = "";
+// parses the url, finds the id, sends id to server, sends json from server to parseScene()
 window.onload = () => {
     id = window.location.href.split('?')[1].split('=')[1];
     document.querySelector('#guid').innerHTML = "ID: " + id;
@@ -202,7 +207,7 @@ window.onload = () => {
     xhr.send();
     console.log(document.querySelector("#colorInput").value);
 }
-
+// takes json representation of the scene and fills the entities array
 function parseScene(sceneObj) {
     for (let entity of sceneObj) {
         let geometry;
@@ -226,22 +231,12 @@ function parseScene(sceneObj) {
         mesh.rotation.copy(entity.rotation);
         mesh.scale.copy(entity.scale);
         mesh.name = entity.name;
-        // mesh.rotation = entity.rotation.clone();
         scene.add(mesh);
         console.log("Added mesh: " + mesh);
         entities.push(mesh);
     }
 }
-// function getNewId() {
-//     let xhr = new XMLHttpRequest();
-//     xhr.open('GET', '/new');
-//     xhr.onload = () => {
-//         console.log(xhr.responseText);
-//         document.querySelector('#guid').innerHTML = "ID: " + xhr.responseText;
-//     }
-//     xhr.send();
-// }
-
+// takes the entities array and reduces each object to the tracked properties
 function getSimplifiedEntities() {
     let simplified = [];
     entities.forEach((ent) => {
@@ -257,9 +252,9 @@ function getSimplifiedEntities() {
 }
 let colorInput = document.querySelector("#colorInput");
 colorInput.oninput = () => {
+    // parse the "color number" into hex, assign it to selected's material
     if (selected) {
         let colorNumber = Number.parseInt(colorInput.value.replace("#", "0x"), 16);
-        console.log(colorNumber);
         let newColor = new THREE.Color(colorNumber);
         selected.material = new THREE.MeshBasicMaterial({color: newColor});
     }
