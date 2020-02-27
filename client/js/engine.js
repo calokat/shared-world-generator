@@ -77,7 +77,6 @@ function moveCamera(e){
         camera.position.add(cameraRight.multiplyScalar(-.1));
     }
 }
-window.addEventListener('keydown', moveCamera);
 
 // this occurs whenever any of the 'Box', 'Cone', or 'Cylinder' buttons are pressed
 function addEntity(geometry, newName) {
@@ -156,6 +155,7 @@ renderer.domElement.addEventListener('mousedown', (e) => {
 })
 
 window.addEventListener('keydown', (e) => {
+    moveCamera(e);
     switch (e.key) {
         case 'Delete':
             controls.detach();
