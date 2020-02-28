@@ -4,7 +4,7 @@ const queryString = require('querystring');
 const scenes = {};
 
 const getNewId = (request, response) => {
-  if (request.headers['accept'] != 'text/plain') {
+  if (request.headers.accept !== 'text/plain') {
     response.writeHead(400);
     response.write('Bad Request');
     response.end();
@@ -16,9 +16,11 @@ const getNewId = (request, response) => {
 };
 
 const getScene = (request, response) => {
-  if (request.headers['accept'] != "application/json") {
+  if (request.headers.accept !== 'application/json') {
     response.writeHead(400);
-    response.write('{"message": "Bad Request"}');
+    if (request.method !== 'HEAD') {
+      response.write('{"message": "Bad Request"}');
+    }
     response.end();
     return;
   }
@@ -28,11 +30,15 @@ const getScene = (request, response) => {
   const scene = scenes[sceneId];
   if (scene) {
     response.writeHead(200, { 'Content-Type': 'application/json' });
-    response.write(scene);
+    if (request.method !== 'HEAD') {
+      response.write(scene);
+    }
     response.end();
   } else {
     response.writeHead(404, { 'Content-Type': 'application/json' });
-    response.write('{"errorCode": "Scene not found"}');
+    if (request.method !== 'HEAD') {
+      response.write('{"errorCode": "Scene not found"}');
+    }
     response.end();
   }
 };
