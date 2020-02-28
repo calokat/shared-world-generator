@@ -34,7 +34,11 @@ window.onload = () => {
     newWorldBtn.addEventListener('click', () => {
         let xhr = new XMLHttpRequest();
         xhr.open('GET', '/new');
+        xhr.setRequestHeader('Accept', "text/plain");
         xhr.onload = () => {
+            if (xhr.status != 200) {
+                return;
+            }
             // With help from https://stackoverflow.com/questions/503093/how-do-i-redirect-to-another-webpage
             //window.location.replace(window.location.href + `engine?id=${xhr.responseText}`);
             window.location.href = window.location.href += `engine?id=${xhr.responseText}`;
@@ -44,6 +48,7 @@ window.onload = () => {
     enterWorldBtn.addEventListener('click', () => {
         let xhr = new XMLHttpRequest();
         xhr.open('GET', `/getScene?id=${idField.value}`);
+        xhr.setRequestHeader('Accept', 'application/json');
         xhr.onload = () => {
             let jsonResponse = JSON.parse(xhr.response);
             if (!jsonResponse.errorCode) {

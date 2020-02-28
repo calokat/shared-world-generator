@@ -197,6 +197,7 @@ window.onload = () => {
     // get the scene from the server, if it exists
     let xhr = new XMLHttpRequest();
     xhr.open('GET', `/getScene?id=${id}`);
+    xhr.setRequestHeader('Accept', 'application/json');
     xhr.onload = () => {
         if (xhr.status == 200) {
             let scene = JSON.parse(xhr.response);

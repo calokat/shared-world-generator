@@ -4,12 +4,24 @@ const queryString = require('querystring');
 const scenes = {};
 
 const getNewId = (request, response) => {
+  if (request.headers['accept'] != 'text/plain') {
+    response.writeHead(400);
+    response.write('Bad Request');
+    response.end();
+    return;
+  }
   response.writeHead(200, { 'Content-Type': 'text/plain' });
   response.write(shortid.generate());
   response.end();
 };
 
 const getScene = (request, response) => {
+  if (request.headers['accept'] != "application/json") {
+    response.writeHead(400);
+    response.write('{"message": "Bad Request"}');
+    response.end();
+    return;
+  }
   const query = request.url.split('?')[1];
   const params = queryString.decode(query);
   const sceneId = params.id;
