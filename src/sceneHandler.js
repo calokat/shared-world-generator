@@ -52,10 +52,26 @@ const addOrUpdateScene = (request, response) => {
     const pairs = body.split('&');
     // id is the first pair, the scene entities are the second
     const id = pairs[0].split('=')[1];
+    // if they do not have a scene, it is a bad request
+    if (!pairs[1]) {
+      response.writeHead(400, { 'Content-Type': 'application/json' });
+      response.write("{'message': 'Bad Request'}");
+      response.end();
+      return;
+    }
     const scene = pairs[1].split('=')[1];
+    let statusCode, message;
+    if (scenes[id]) {
+      statusCode = 204;
+      message = "Updated";
+    }
+    else {
+      statusCode = 201;
+      message = "Created";
+    }
     scenes[id] = scene;
-    response.writeHead(204, { 'Content-Type': 'application/json' });
-    response.write('{"message": "Updated"}');
+    response.writeHead(statusCode, { 'Content-Type': 'application/json' });
+    response.write(`{"message": "${message}"}`);
     response.end();
   });
 };
