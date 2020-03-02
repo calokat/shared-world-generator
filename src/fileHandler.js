@@ -1,5 +1,5 @@
 const fs = require('fs');
-const http = require('http');
+const https = require('https');
 const queryString = require('querystring');
 // read all of the files
 const index = fs.readFileSync(`${__dirname}/../client/index.html`);
@@ -30,14 +30,15 @@ const getEngine = (request, response) => {
   const sceneId = params.id;
   // sends a HEAD request to /getScene. If successful, sends client
   // to the app. If not, gives a 404
-  http.get({
+  https.get({
     hostname: 'shared-world-generator.herokuapp.com',
+    port: process.env.PORT || process.env.NODE_PORT || 3000,
     path: `/getScene?id=${sceneId}`,
     method: 'HEAD',
     headers: {
       Accept: 'application/json',
     },
-    protocol: 'https:'
+    protocol: 'https:',
   }, (res) => {
     if (res.statusCode === 200) {
       writeResponse(request, response, engine, 'text/html');
