@@ -35,6 +35,9 @@ const onRequest = (request, response) => {
     case '/TransformControls.js':
       fileHandler.getTransformControlsJs(request, response);
       break;
+    case '/404':
+      fileHandler.get404(request, response);
+      break;
     default:
       fileHandler.getIndex(request, response);
       break;
