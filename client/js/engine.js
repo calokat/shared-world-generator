@@ -1,13 +1,15 @@
+// https://github.com/mrdoob/three.js/blob/dev/build/three.module.js
 import * as THREE from '/three.module.js';
 // From https://discourse.threejs.org/t/transformcontrols-rotation-is-not-working/7519/5
 import {TransformControls} from '/TransformControls.js';
 // set up the scene, camera, and renderer
-var scene = new THREE.Scene();
-var camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 1000 );
+// From https://threejs.org/docs/index.html#manual/en/introduction/Creating-a-scene
+let scene = new THREE.Scene();
+let camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 1000 );
 camera.position.y = 5;
 camera.position.z = 5;
 camera.rotation.set(-Math.PI / 4, 0, 0, 'XYZ');
-var renderer = new THREE.WebGLRenderer();
+let renderer = new THREE.WebGLRenderer();
 renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
 // prevent the right click menu from showing up on the canvas
@@ -23,15 +25,15 @@ animate();
 // holds all of the entities in the scene
 let entities = [];
 // variables that hold various geometry. Used when instantiating the entities.
-var boxGeometry = new THREE.BoxGeometry( 1, 1, 1 );
+let boxGeometry = new THREE.BoxGeometry( 1, 1, 1 );
 let coneGeometry = new THREE.ConeGeometry(1, 1, 20);
 let cylinderGeometry = new THREE.CylinderGeometry(1, 1, 1, 20);
 // the basic (unlit) material all shapes have. Green is the default, though that can be changed.
-var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+let material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
 
 // with help from https://threejs.org/docs/#api/en/core/Raycaster
-var raycaster = new THREE.Raycaster();
-var mouseMovement = new THREE.Vector2();
+let raycaster = new THREE.Raycaster();
+let mouseMovement = new THREE.Vector2();
 let mousePos = new THREE.Vector2();
 
 let controls = new TransformControls(camera, renderer.domElement);
@@ -71,8 +73,8 @@ window.addEventListener('mousemove', onMouseMove);
 
 // moves the camera based on WASD input.
 function moveCamera(e){
-    var cameraFwd = new THREE.Vector3();
-    var cameraRight = new THREE.Vector3(1, 0, 0);
+    let cameraFwd = new THREE.Vector3();
+    let cameraRight = new THREE.Vector3(1, 0, 0);
     camera.getWorldDirection(cameraFwd);
     cameraRight.applyQuaternion(camera.quaternion);
     if (e.key == "w"){
@@ -110,6 +112,12 @@ document.querySelector("#coneBtn").addEventListener('click', () => {
 document.querySelector("#cylinderBtn").addEventListener('click', () => {
     addEntity(cylinderGeometry, "Cylinder");
 })
+
+// create grid, with help from https://threejs.org/docs/index.html#api/en/helpers/GridHelper
+let size = 10;
+let divisions = 10;
+let gridHelper = new THREE.GridHelper( size, divisions );
+scene.add( gridHelper );
 
 let selected;
 // white wireframe of selected
@@ -191,11 +199,6 @@ window.addEventListener('keydown', (e) => {
     }
 })
 
-// create grid, with help from https://threejs.org/docs/index.html#api/en/helpers/GridHelper
-var size = 10;
-var divisions = 10;
-var gridHelper = new THREE.GridHelper( size, divisions );
-scene.add( gridHelper );
 // creates a JSON representation of all entities, sends that and the id to the server
 document.querySelector("#saveBtn").addEventListener('click', (e) => {
     let entitiesStr = JSON.stringify(getSimplifiedEntities());
