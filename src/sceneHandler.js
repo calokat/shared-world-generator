@@ -17,10 +17,19 @@ const getNewId = (request, response) => {
     writeResponse(request, response, 400, 'text/plain', 'Bad Request');
     return;
   }
-  let newID = shortid.generate();
+  const newID = shortid.generate();
   scenes[newID] = '[]';
   writeResponse(request, response, 200, 'text/plain', newID);
 };
+
+const doesSceneExist = (request) => {
+  const query = request.url.split('?')[1];
+  const params = queryString.decode(query);
+  const sceneId = params.id;
+  const scene = scenes[sceneId];
+  return scene;
+};
+
 // gets a scene from the scenes object by using the id param
 // in the query as a key
 const getScene = (request, response) => {
@@ -35,14 +44,6 @@ const getScene = (request, response) => {
     writeResponse(request, response, 404, 'application/json', '{"errorCode": "Scene not found"}');
   }
 };
-
-const doesSceneExist = (request) => {
-  const query = request.url.split('?')[1];
-  const params = queryString.decode(query);
-  const sceneId = params.id;
-  const scene = scenes[sceneId];
-  return scene;
-}
 
 const addOrUpdateScene = (request, response) => {
   let body = [];
@@ -60,10 +61,10 @@ const addOrUpdateScene = (request, response) => {
     }
     // get the second parameter
     const scene = pairs[1].split('=')[1];
-    let statusCode; 
+    let statusCode;
     let message;
     // if the scene exists, send 204. If not, send 201
-    if (scenes[id] != '[]') {
+    if (scenes[id] !== '[]') {
       statusCode = 204;
       message = 'Updated';
     } else {
@@ -79,5 +80,5 @@ module.exports = {
   getNewId,
   addOrUpdateScene,
   getScene,
-  doesSceneExist
+  doesSceneExist,
 };
