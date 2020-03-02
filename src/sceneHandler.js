@@ -17,7 +17,9 @@ const getNewId = (request, response) => {
     writeResponse(request, response, 400, 'text/plain', 'Bad Request');
     return;
   }
-  writeResponse(request, response, 200, 'text/plain', shortid.generate());
+  let newID = shortid.generate();
+  scenes[newID] = '[]';
+  writeResponse(request, response, 200, 'text/plain', newID);
 };
 // gets a scene from the scenes object by using the id param
 // in the query as a key
@@ -33,7 +35,7 @@ const getScene = (request, response) => {
   if (scene) {
     writeResponse(request, response, 200, 'application/json', scene);
   } else {
-    writeResponse(request, response, 404, 'application/json', '{"errorCode": "Scene not found"}');
+      writeResponse(request, response, 404, 'application/json', '{"exists": "false"}');
   }
 };
 

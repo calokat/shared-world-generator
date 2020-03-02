@@ -53,16 +53,16 @@ window.onload = () => {
     // and if so puts it in the url to redirect.
     enterWorldBtn.addEventListener('click', () => {
         let xhr = new XMLHttpRequest();
-        xhr.open('GET', `/getScene?id=${idField.value}`);
+        xhr.open('HEAD', `/getScene?id=${idField.value}`);
         xhr.setRequestHeader('Accept', 'application/json');
         xhr.onload = () => {
-            let jsonResponse = JSON.parse(xhr.response);
-            if (!jsonResponse.errorCode) {
-                window.location.href = window.location.href += `engine?id=${idField.value}`;
-            }
-            // Thanks to https://www.w3schools.com/js/tryit.asp?filename=tryjs_visibility for a quick refresher
-            else {
+            if (xhr.status === 404) {
+                // Thanks to https://www.w3schools.com/js/tryit.asp?filename=tryjs_visibility for a quick refresher
                 errorDisplay.style.visibility = "visible";
+                return;
+            }
+            else if (xhr.status == 200) {
+                window.location.href = window.location.href += `engine?id=${idField.value}`;
             }
         }
         xhr.send();
