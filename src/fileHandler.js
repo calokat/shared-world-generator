@@ -32,7 +32,6 @@ const getEngine = (request, response) => {
   // to the app. If not, gives a 404
   https.request({
     hostname: 'shared-world-generator.herokuapp.com',
-    port: process.env.PORT || process.env.NODE_PORT || 3000,
     path: `/getScene?id=${sceneId}`,
     method: 'HEAD',
     headers: {
