@@ -17,7 +17,7 @@ const getNewId = (request, response) => {
     writeResponse(request, response, 400, 'text/plain', 'Bad Request');
     return;
   }
-  let newID = shortid.generate();
+  const newID = shortid.generate();
   scenes[newID] = '[]';
   writeResponse(request, response, 200, 'text/plain', newID);
 };
@@ -35,7 +35,7 @@ const getScene = (request, response) => {
   if (scene) {
     writeResponse(request, response, 200, 'application/json', scene);
   } else {
-      writeResponse(request, response, 404, 'application/json', '{"exists": "false"}');
+    writeResponse(request, response, 404, 'application/json', '{"exists": "false"}');
   }
 };
 
@@ -55,7 +55,7 @@ const addOrUpdateScene = (request, response) => {
     }
     // get the second parameter
     const scene = pairs[1].split('=')[1];
-    let statusCode; 
+    let statusCode;
     let message;
     // if the scene exists, send 204. If not, send 201
     if (scenes[id]) {

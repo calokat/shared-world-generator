@@ -36,16 +36,15 @@ const getEngine = (request, response) => {
     path: `/getScene?id=${sceneId}`,
     method: 'HEAD',
     headers: {
-      'Accept': 'application/json'
-    }
+      Accept: 'application/json',
+    },
   }, (res) => {
     if (res.statusCode === 200) {
       writeResponse(request, response, engine, 'text/html');
-    }
-    else {
+    } else {
       writeResponse(request, response, error404, 'text/html');
     }
-  })
+  });
 };
 const getIndexJs = (request, response) => {
   writeResponse(request, response, clientJs, 'application/javascript');
@@ -61,7 +60,7 @@ const getTransformControlsJs = (request, response) => {
 };
 const get404 = (request, response) => {
   writeResponse(request, response, error404, 'text/html');
-}
+};
 
 
 module.exports = {
