@@ -53,20 +53,8 @@ function onMouseMove( event ) {
     mousePos.x = ( event.clientX / window.innerWidth ) * 2 - 1;
     mousePos.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
     if (event.buttons != 0){
-        // rotate the camera using quaternions
-        let xRot = new THREE.Quaternion();
-        let yRot = new THREE.Quaternion();
-        let cameraFwd = new THREE.Vector3();
-        let cameraUp = new THREE.Vector3(0, 1, 0);
-        camera.getWorldDirection(cameraFwd);
-        let cameraRight = cameraFwd.cross(cameraUp);
-        cameraRight.applyQuaternion(camera.quaternion);
-        xRot.setFromAxisAngle( cameraRight, -mouseMovement.y);
-        yRot.setFromAxisAngle( cameraUp, -mouseMovement.x);
-        camera.quaternion.multiply(yRot);
-        camera.quaternion.multiply(xRot);
-        cameraUp.applyQuaternion(camera.rotation);
-        camera.up = cameraUp;
+        camera.rotation.y -= mouseMovement.x;
+        camera.rotation.x -= mouseMovement.y;
     }
 }
 window.addEventListener('mousemove', onMouseMove);
