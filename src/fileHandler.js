@@ -1,4 +1,5 @@
 const fs = require('fs');
+const sceneHandler = require('./sceneHandler');
 // read all of the files
 const index = fs.readFileSync(`${__dirname}/../client/index.html`);
 const engine = fs.readFileSync(`${__dirname}/../client/engine.html`);
@@ -6,6 +7,7 @@ const clientJs = fs.readFileSync(`${__dirname}/../client/js/index.js`);
 const threeJs = fs.readFileSync(`${__dirname}/../client/js/three.module.js`);
 const engineJs = fs.readFileSync(`${__dirname}/../client/js/engine.js`);
 const transformControlsJs = fs.readFileSync(`${__dirname}/../client/js/TransformControls.js`);
+const error404 = fs.readFileSync(`${__dirname}/../client/404.html`);
 // generic helper method
 const writeResponse = (request, response, file, contentType) => {
   response.writeHead(200, { 'Content-Type': contentType });
@@ -17,7 +19,12 @@ const getIndex = (request, response) => {
 };
 
 const getEngine = (request, response) => {
-  writeResponse(request, response, engine, 'text/html');
+  if (sceneHandler.doesSceneExist(request)) {
+    writeResponse(request, response, engine, 'text/html');
+  }
+  else {
+    writeResponse(request, response, error404, 'text/html');
+  }
 };
 const getIndexJs = (request, response) => {
   writeResponse(request, response, clientJs, 'application/javascript');
@@ -31,6 +38,9 @@ const getEngineJs = (request, response) => {
 const getTransformControlsJs = (request, response) => {
   writeResponse(request, response, transformControlsJs, 'application/javascript');
 };
+const get404 = (request, response) => {
+  writeResponse(request, response, error404, 'text/html');
+};
 
 
 module.exports = {
@@ -40,4 +50,5 @@ module.exports = {
   getThreeJs,
   getEngineJs,
   getTransformControlsJs,
+  get404
 };
