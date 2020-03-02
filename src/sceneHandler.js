@@ -1,27 +1,29 @@
 const shortid = require('shortid');
 const queryString = require('querystring');
-
+// the storage for the api
 const scenes = {};
 
+const writeResponse = (request, response, status, contentType, message = '') => {
+  response.writeHead(status, {'Content-Type': contentType});
+  if (request.method !== "HEAD") {
+    response.write(message);
+  }
+  response.end();
+}
+
+// sends a new id with shortid
 const getNewId = (request, response) => {
   if (request.headers.accept !== 'text/plain') {
-    response.writeHead(400);
-    response.write('Bad Request');
-    response.end();
+    writeResponse(request, response, 400, "text/plain", "Bad Request");
     return;
   }
-  response.writeHead(200, { 'Content-Type': 'text/plain' });
-  response.write(shortid.generate());
-  response.end();
+  writeResponse(request, response, 200, "text/plain", shortid.generate());
 };
-
+// gets a scene from the scenes object by using the id param
+// in the query as a key
 const getScene = (request, response) => {
   if (request.headers.accept !== 'application/json') {
-    response.writeHead(400);
-    if (request.method !== 'HEAD') {
-      response.write('{"message": "Bad Request"}');
-    }
-    response.end();
+    writeResponse(request, response, 400, "application/json", '{"message": "Bad Request"}');
     return;
   }
   const query = request.url.split('?')[1];
@@ -29,17 +31,9 @@ const getScene = (request, response) => {
   const sceneId = params.id;
   const scene = scenes[sceneId];
   if (scene) {
-    response.writeHead(200, { 'Content-Type': 'application/json' });
-    if (request.method !== 'HEAD') {
-      response.write(scene);
-    }
-    response.end();
+    writeResponse(request, response, 200, "application/json", scene);
   } else {
-    response.writeHead(404, { 'Content-Type': 'application/json' });
-    if (request.method !== 'HEAD') {
-      response.write('{"errorCode": "Scene not found"}');
-    }
-    response.end();
+    writeResponse(request, response, 404, "application/json", '{"errorCode": "Scene not found"}');
   }
 };
 
@@ -54,13 +48,13 @@ const addOrUpdateScene = (request, response) => {
     const id = pairs[0].split('=')[1];
     // if they do not have a scene, it is a bad request
     if (!pairs[1]) {
-      response.writeHead(400, { 'Content-Type': 'application/json' });
-      response.write("{'message': 'Bad Request'}");
-      response.end();
+      writeResponse(request, response, 400, "application/json", "{'message': 'Bad Request'}");
       return;
     }
+    // get the second parameter
     const scene = pairs[1].split('=')[1];
     let statusCode, message;
+    // if the scene exists, send 204. If not, send 201
     if (scenes[id]) {
       statusCode = 204;
       message = "Updated";
@@ -70,9 +64,7 @@ const addOrUpdateScene = (request, response) => {
       message = "Created";
     }
     scenes[id] = scene;
-    response.writeHead(statusCode, { 'Content-Type': 'application/json' });
-    response.write(`{"message": "${message}"}`);
-    response.end();
+    writeResponse(request, response, statusCode, "application/json", `{"message": "${message}"}`);
   });
 };
 
