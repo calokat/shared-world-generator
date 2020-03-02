@@ -14,7 +14,7 @@ document.body.appendChild( renderer.domElement );
 renderer.domElement.addEventListener('contextmenu', (e) => {
     e.preventDefault();
 })
-
+// basic render loop
 function animate() {
     requestAnimationFrame( animate );
     renderer.render( scene, camera );

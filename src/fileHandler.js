@@ -17,7 +17,7 @@ const writeResponse = (request, response, file, contentType) => {
 const getIndex = (request, response) => {
   writeResponse(request, response, index, 'text/html');
 };
-
+// if the scene id from the request query is in the api, go to the app. If not, go to the error page
 const getEngine = (request, response) => {
   if (sceneHandler.doesSceneExist(request)) {
     writeResponse(request, response, engine, 'text/html');

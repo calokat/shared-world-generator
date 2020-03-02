@@ -40,6 +40,7 @@ let controls = new TransformControls(camera, renderer.domElement);
 controls.name = "TransformControls";
 // the TransformControls only show up when attached to an object
 scene.add(controls);
+//changes the object the transform controls are attached to
 controls.addEventListener('objectChange',  () => {
     selectedOutline.position.set(selected.position.x, selected.position.y, selected.position.z);
     selectedOutline.rotation.copy(selected.rotation);
@@ -110,6 +111,7 @@ scene.add( gridHelper );
 let selected;
 // white wireframe of selected
 let selectedOutline;
+// selects objects in the scene when a user clicks on them
 renderer.domElement.addEventListener('mousedown', (e) => {
     // ignore if right mouse button was pressed
     if (e.button == 2) {

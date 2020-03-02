@@ -2,7 +2,7 @@ const shortid = require('shortid');
 const queryString = require('querystring');
 // the storage for the api
 const scenes = { demo: '[{"name":"Cube","color":65280,"position":{"x":0,"y":1.4644660940672622,"z":1.4644660940672627},"rotation":{"_x":0,"_y":0,"_z":0,"_order":"XYZ"},"scale":{"x":1,"y":1,"z":1}}]' };
-
+// helper method for writing responses
 const writeResponse = (request, response, status, contentType, message = '') => {
   response.writeHead(status, { 'Content-Type': contentType });
   if (request.method !== 'HEAD') {
@@ -21,7 +21,7 @@ const getNewId = (request, response) => {
   scenes[newID] = '[]';
   writeResponse(request, response, 200, 'text/plain', newID);
 };
-
+// checks if the scene exists, returns undefined if not
 const doesSceneExist = (request) => {
   const query = request.url.split('?')[1];
   const params = queryString.decode(query);
@@ -44,7 +44,7 @@ const getScene = (request, response) => {
     writeResponse(request, response, 404, 'application/json', '{"errorCode": "Scene not found"}');
   }
 };
-
+// either adds a new scene to the api, or updates an existing one
 const addOrUpdateScene = (request, response) => {
   let body = [];
   request.on('data', (chunk) => {
