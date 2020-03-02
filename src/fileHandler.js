@@ -21,8 +21,7 @@ const getIndex = (request, response) => {
 const getEngine = (request, response) => {
   if (sceneHandler.doesSceneExist(request)) {
     writeResponse(request, response, engine, 'text/html');
-  }
-  else {
+  } else {
     writeResponse(request, response, error404, 'text/html');
   }
 };
@@ -50,5 +49,5 @@ module.exports = {
   getThreeJs,
   getEngineJs,
   getTransformControlsJs,
-  get404
+  get404,
 };
