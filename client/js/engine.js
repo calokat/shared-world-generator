@@ -51,8 +51,20 @@ function onMouseMove( event ) {
     mousePos.x = ( event.clientX / window.innerWidth ) * 2 - 1;
     mousePos.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
     if (event.buttons != 0){
-        camera.rotation.y -= mouseMovement.x;
-        camera.rotation.x -= mouseMovement.y;
+        // rotate the camera using quaternions
+        let xRot = new THREE.Quaternion();
+        let yRot = new THREE.Quaternion();
+        let cameraFwd = new THREE.Vector3();
+        let cameraUp = new THREE.Vector3(0, 1, 0);
+        camera.getWorldDirection(cameraFwd);
+        let cameraRight = cameraFwd.cross(cameraUp);
+        cameraRight.applyQuaternion(camera.quaternion);
+        xRot.setFromAxisAngle( cameraRight, -mouseMovement.y);
+        yRot.setFromAxisAngle( cameraUp, -mouseMovement.x);
+        camera.quaternion.multiply(yRot);
+        camera.quaternion.multiply(xRot);
+        cameraUp.applyQuaternion(camera.rotation);
+        camera.up = cameraUp;
     }
 }
 window.addEventListener('mousemove', onMouseMove);
@@ -60,10 +72,9 @@ window.addEventListener('mousemove', onMouseMove);
 // moves the camera based on WASD input.
 function moveCamera(e){
     var cameraFwd = new THREE.Vector3();
-    var cameraRight = new THREE.Vector3();
+    var cameraRight = new THREE.Vector3(1, 0, 0);
     camera.getWorldDirection(cameraFwd);
-    // Camera knows its forward, we cross product that with the up vector to get the right vector
-    cameraRight.crossVectors(new THREE.Vector3(0, 1, 0), cameraFwd);
+    cameraRight.applyQuaternion(camera.quaternion);
     if (e.key == "w"){
         camera.position.add(cameraFwd.multiplyScalar(.1));
     }
@@ -71,10 +82,10 @@ function moveCamera(e){
         camera.position.add(cameraFwd.multiplyScalar(-.1));
     }
     if (e.key == "a"){
-        camera.position.add(cameraRight.multiplyScalar(.1));
+        camera.position.add(cameraRight.multiplyScalar(-.1));
     }
     if (e.key == "d"){
-        camera.position.add(cameraRight.multiplyScalar(-.1));
+        camera.position.add(cameraRight.multiplyScalar(.1));
     }
 }
 
@@ -124,7 +135,9 @@ renderer.domElement.addEventListener('mousedown', (e) => {
         return;
     }
     let firstMeshIndex = 0;
+    // loop through the objects hit by the raycast.
     for (; firstMeshIndex < intersects.length; ++firstMeshIndex){
+        // if a mesh is hit
         if (intersects[firstMeshIndex].object.type == "Mesh"){
             selected = intersects[firstMeshIndex].object;
             controls.attach(selected);
@@ -156,6 +169,7 @@ renderer.domElement.addEventListener('mousedown', (e) => {
 
 window.addEventListener('keydown', (e) => {
     moveCamera(e);
+    // handle miscellaneous keys
     switch (e.key) {
         case 'Delete':
             controls.detach();
@@ -182,7 +196,7 @@ var size = 10;
 var divisions = 10;
 var gridHelper = new THREE.GridHelper( size, divisions );
 scene.add( gridHelper );
-
+// creates a JSON representation of all entities, sends that and the id to the server
 document.querySelector("#saveBtn").addEventListener('click', (e) => {
     let entitiesStr = JSON.stringify(getSimplifiedEntities());
     let xhr = new XMLHttpRequest();
@@ -201,12 +215,10 @@ window.onload = () => {
     xhr.onload = () => {
         if (xhr.status == 200) {
             let scene = JSON.parse(xhr.response);
-            console.log("About to parse");
             parseScene(scene);
         }
     }
     xhr.send();
-    console.log(document.querySelector("#colorInput").value);
 }
 // takes json representation of the scene and fills the entities array
 function parseScene(sceneObj) {
@@ -233,7 +245,6 @@ function parseScene(sceneObj) {
         mesh.scale.copy(entity.scale);
         mesh.name = entity.name;
         scene.add(mesh);
-        console.log("Added mesh: " + mesh);
         entities.push(mesh);
     }
 }
