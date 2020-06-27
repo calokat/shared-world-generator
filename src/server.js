@@ -41,6 +41,9 @@ const onRequest = (request, response) => {
     case '/VRButton.js':
       fileHandler.getVRButton(request, response);
       break;
+    case '/PointerLockControls.js':
+      fileHandler.getPointerLockControls(request, response);
+      break;
     default:
       fileHandler.getIndex(request, response);
       break;
