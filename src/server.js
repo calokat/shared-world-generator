@@ -38,6 +38,9 @@ const onRequest = (request, response) => {
     case '/404':
       fileHandler.get404(request, response);
       break;
+    case '/VRButton.js':
+      fileHandler.getVRButton(request, response);
+      break;
     default:
       fileHandler.getIndex(request, response);
       break;

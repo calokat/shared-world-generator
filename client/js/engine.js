@@ -2,6 +2,7 @@
 import * as THREE from '/three.module.js';
 // From https://discourse.threejs.org/t/transformcontrols-rotation-is-not-working/7519/5
 import {TransformControls} from '/TransformControls.js';
+import {VRButton} from '/VRButton.js';
 // set up the scene, camera, and renderer
 // From https://threejs.org/docs/index.html#manual/en/introduction/Creating-a-scene
 let scene = new THREE.Scene();
@@ -10,8 +11,10 @@ camera.position.y = 5;
 camera.position.z = 5;
 camera.rotation.set(-Math.PI / 4, 0, 0, 'XYZ');
 let renderer = new THREE.WebGLRenderer();
+renderer.xr.enabled = true;
 renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
+document.body.appendChild(VRButton.createButton(renderer));
 // prevent the right click menu from showing up on the canvas
 renderer.domElement.addEventListener('contextmenu', (e) => {
     e.preventDefault();

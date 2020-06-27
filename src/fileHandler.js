@@ -8,6 +8,7 @@ const threeJs = fs.readFileSync(`${__dirname}/../client/js/three.module.js`);
 const engineJs = fs.readFileSync(`${__dirname}/../client/js/engine.js`);
 const transformControlsJs = fs.readFileSync(`${__dirname}/../client/js/TransformControls.js`);
 const error404 = fs.readFileSync(`${__dirname}/../client/404.html`);
+const VRButton = fs.readFileSync(`${__dirname}/../client/js/VRButton.js`);
 // generic helper method
 const writeResponse = (request, response, file, contentType) => {
   response.writeHead(200, { 'Content-Type': contentType });
@@ -40,6 +41,9 @@ const getTransformControlsJs = (request, response) => {
 const get404 = (request, response) => {
   writeResponse(request, response, error404, 'text/html');
 };
+const getVRButton = (request, response) => {
+  writeResponse(request, response, VRButton, 'application/javascript');
+}
 
 
 module.exports = {
@@ -50,4 +54,5 @@ module.exports = {
   getEngineJs,
   getTransformControlsJs,
   get404,
+  getVRButton,
 };
