@@ -21,7 +21,6 @@ renderer.xr.enabled = true;
 
 // basic update loop
 function animate() {
-    requestAnimationFrame( animate );
     renderer.render( scene, camera );
 }
 var _sessionHandler = new SessionHandler(renderer, camera);
