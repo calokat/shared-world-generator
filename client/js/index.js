@@ -68,3 +68,11 @@ window.onload = () => {
         xhr.send();
     });
 }
+
+// https://halfbaked.city/tutorials/getting-started-with-webxr-part-1
+function onResize () {
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', onResize);
