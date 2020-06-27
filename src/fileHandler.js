@@ -45,14 +45,13 @@ const get404 = (request, response) => {
 };
 const getVRButton = (request, response) => {
   writeResponse(request, response, VRButton, 'application/javascript');
-}
+};
 const getPointerLockControls = (request, response) => {
   writeResponse(request, response, pointerLockControls, 'application/javascript');
-}
+};
 const getSessionHandler = (request, response) => {
   writeResponse(request, response, sessionHandler, 'application/javascript');
-}
-
+};
 
 module.exports = {
   getIndex,
