@@ -44,6 +44,9 @@ const onRequest = (request, response) => {
     case '/PointerLockControls.js':
       fileHandler.getPointerLockControls(request, response);
       break;
+    case '/SessionHandler.js':
+      fileHandler.getSessionHandler(request, response);
+      break;
     default:
       fileHandler.getIndex(request, response);
       break;

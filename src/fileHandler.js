@@ -10,6 +10,7 @@ const transformControlsJs = fs.readFileSync(`${__dirname}/../client/js/Transform
 const error404 = fs.readFileSync(`${__dirname}/../client/404.html`);
 const VRButton = fs.readFileSync(`${__dirname}/../client/js/VRButton.js`);
 const pointerLockControls = fs.readFileSync(`${__dirname}/../client/js/PointerLockControls.js`);
+const sessionHandler = fs.readFileSync(`${__dirname}/../client/js/SessionHandler.js`);
 // generic helper method
 const writeResponse = (request, response, file, contentType) => {
   response.writeHead(200, { 'Content-Type': contentType });
@@ -48,6 +49,9 @@ const getVRButton = (request, response) => {
 const getPointerLockControls = (request, response) => {
   writeResponse(request, response, pointerLockControls, 'application/javascript');
 }
+const getSessionHandler = (request, response) => {
+  writeResponse(request, response, sessionHandler, 'application/javascript');
+}
 
 
 module.exports = {
@@ -60,4 +64,5 @@ module.exports = {
   get404,
   getVRButton,
   getPointerLockControls,
+  getSessionHandler,
 };
