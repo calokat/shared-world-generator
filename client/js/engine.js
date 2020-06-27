@@ -11,20 +11,24 @@ camera.position.y = 5;
 camera.position.z = 5;
 camera.rotation.set(-Math.PI / 4, 0, 0, 'XYZ');
 let renderer = new THREE.WebGLRenderer();
-renderer.xr.enabled = true;
 renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
 // prevent the right click menu from showing up on the canvas
 renderer.domElement.addEventListener('contextmenu', (e) => {
     e.preventDefault();
 })
+renderer.xr.enabled = true;
+
 // basic update loop
 function animate() {
     requestAnimationFrame( animate );
     renderer.render( scene, camera );
 }
 var _sessionHandler = new SessionHandler(renderer, camera);
-animate();
+// animate();
+renderer.setAnimationLoop( function () {
+	animate();
+} );
 // holds all of the entities in the scene
 let entities = [];
 // variables that hold various geometry. Used when instantiating the entities.
