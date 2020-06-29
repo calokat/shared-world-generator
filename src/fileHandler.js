@@ -4,12 +4,12 @@ const sceneHandler = require('./sceneHandler');
 const index = fs.readFileSync(`${__dirname}/../client/index.html`);
 const engine = fs.readFileSync(`${__dirname}/../client/engine.html`);
 const clientJs = fs.readFileSync(`${__dirname}/../client/js/index.js`);
-const threeJs = fs.readFileSync(`${__dirname}/../client/js/three.module.js`);
+const threeJs = fs.readFileSync(`${__dirname}/../client/js/three/build/three.module.js`);
 const engineJs = fs.readFileSync(`${__dirname}/../client/js/engine.js`);
-const transformControlsJs = fs.readFileSync(`${__dirname}/../client/js/TransformControls.js`);
+const transformControlsJs = fs.readFileSync(`${__dirname}/../client/js/three/controls/TransformControls.js`);
 const error404 = fs.readFileSync(`${__dirname}/../client/404.html`);
-const VRButton = fs.readFileSync(`${__dirname}/../client/js/VRButton.js`);
-const pointerLockControls = fs.readFileSync(`${__dirname}/../client/js/PointerLockControls.js`);
+const VRButton = fs.readFileSync(`${__dirname}/../client/js/three/webxr/VRButton.js`);
+const pointerLockControls = fs.readFileSync(`${__dirname}/../client/js/three/controls/PointerLockControls.js`);
 const sessionHandler = fs.readFileSync(`${__dirname}/../client/js/SessionHandler.js`);
 // generic helper method
 const writeResponse = (request, response, file, contentType) => {
