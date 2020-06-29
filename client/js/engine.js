@@ -54,15 +54,8 @@ controls.addEventListener('objectChange',  () => {
 });
 // updates mousePos. If a mouse button is held down, track the mouse movement to rotate the camera accordingly
 function onMouseMove( event ) {
-    mouseMovement.x = event.movementX * (1/600);
-    mouseMovement.y = event.movementY * (1/600);
-
     mousePos.x = ( event.clientX / window.innerWidth ) * 2 - 1;
     mousePos.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-    if (event.buttons != 0){
-        camera.rotation.y -= mouseMovement.x;
-        camera.rotation.x -= mouseMovement.y;
-    }
 }
 window.addEventListener('mousemove', onMouseMove);
 
