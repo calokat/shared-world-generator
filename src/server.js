@@ -47,6 +47,15 @@ const onRequest = (request, response) => {
     case '/SessionHandler.js':
       fileHandler.getSessionHandler(request, response);
       break;
+    case '/GLTFLoader.js':
+      fileHandler.getGLTFLoader(request, response);
+      break;
+    case '/XRControllerModelFactory.js':
+      fileHandler.getXRControllerModelFactory(request, response);
+      break;
+    case '/motion-controllers.module.js':
+      fileHandler.getMotionControllers(request, response);
+      break;
     default:
       fileHandler.getIndex(request, response);
       break;
