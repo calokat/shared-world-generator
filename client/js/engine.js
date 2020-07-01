@@ -2,7 +2,8 @@
 import * as THREE from '/three.module.js';
 // From https://discourse.threejs.org/t/transformcontrols-rotation-is-not-working/7519/5
 import {TransformControls} from '/TransformControls.js';
-import SessionHandler from '/SessionHandler.js'
+import SessionHandler from '/SessionHandler.js';
+import {XRControllerModelFactory} from '/XRControllerModelFactory.js';
 // set up the scene, camera, and renderer
 // From https://threejs.org/docs/index.html#manual/en/introduction/Creating-a-scene
 let scene = new THREE.Scene();
@@ -18,7 +19,82 @@ renderer.domElement.addEventListener('contextmenu', (e) => {
     e.preventDefault();
 })
 renderer.xr.enabled = true;
+// onSelectStart/End and buildController from https://github.com/mrdoob/three.js/blob/dev/examples/webxr_vr_ballshooter.html
+function onSelectStart() {
+    this.userData.isSelecting = true;
+}
 
+function onSelectEnd() {
+    this.userData.isSelecting = false;
+}
+
+function buildController( data ) {
+
+    switch ( data.targetRayMode ) {
+
+        case 'tracked-pointer':
+
+            var geometry = new THREE.BufferGeometry();
+            geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( [ 0, 0, 0, 0, 0, - 1 ], 3 ) );
+            geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( [ 0.5, 0.5, 0.5, 0, 0, 0 ], 3 ) );
+
+            var material = new THREE.LineBasicMaterial( { vertexColors: true, blending: THREE.AdditiveBlending } );
+
+            return new THREE.Line( geometry, material );
+
+        case 'gaze':
+
+            var geometry = new THREE.RingBufferGeometry( 0.02, 0.04, 32 ).translate( 0, 0, - 1 );
+            var material = new THREE.MeshBasicMaterial( { opacity: 0.5, transparent: true } );
+            return new THREE.Mesh( geometry, material );
+
+    }
+
+}
+
+// declare controllers: https://github.com/mrdoob/three.js/blob/master/examples/webxr_vr_ballshooter.html#L24
+let controller1, controller2;
+let controllerGrip1, controllerGrip2;
+
+controller1 = renderer.xr.getController(0);
+controller1.addEventListener( 'selectstart', onSelectStart );
+controller1.addEventListener( 'selectend', onSelectEnd );
+controller1.addEventListener( 'connected', function ( event ) {
+
+    this.add( buildController( event.data ) );
+
+} );
+controller1.addEventListener( 'disconnected', function () {
+
+    this.remove( this.children[ 0 ] );
+
+} );
+scene.add( controller1 );
+
+controller2 = renderer.xr.getController( 1 );
+controller2.addEventListener( 'selectstart', onSelectStart );
+controller2.addEventListener( 'selectend', onSelectEnd );
+controller2.addEventListener( 'connected', function ( event ) {
+
+    this.add( buildController( event.data ) );
+
+} );
+controller2.addEventListener( 'disconnected', function () {
+
+    this.remove( this.children[ 0 ] );
+
+} );
+scene.add( controller2 );
+
+var controllerModelFactory = new XRControllerModelFactory();
+
+controllerGrip1 = renderer.xr.getControllerGrip( 0 );
+controllerGrip1.add( controllerModelFactory.createControllerModel( controllerGrip1 ) );
+scene.add( controllerGrip1 );
+
+controllerGrip2 = renderer.xr.getControllerGrip( 1 );
+controllerGrip2.add( controllerModelFactory.createControllerModel( controllerGrip2 ) );
+scene.add( controllerGrip2 );
 // basic update loop
 function animate() {
     renderer.render( scene, camera );
