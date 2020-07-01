@@ -1,8 +1,8 @@
-const http = require('http');
+const https = require('https');
 const url = require('url');
 const fileHandler = require('./fileHandler');
 const sceneHandler = require('./sceneHandler');
-
+const fs = require('fs');
 const port = process.env.PORT || process.env.NODE_PORT || 3000;
 
 const onRequest = (request, response) => {
@@ -62,4 +62,9 @@ const onRequest = (request, response) => {
   }
 };
 
-http.createServer(onRequest).listen(port);
+const options = {
+  key: fs.readFileSync(`${__dirname}/../key.pem`),
+  cert: fs.readFileSync(`${__dirname}/../cert.pem`)
+};
+
+https.createServer(options, onRequest).listen(port);
