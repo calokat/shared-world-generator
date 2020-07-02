@@ -22,6 +22,7 @@ renderer.xr.enabled = true;
 // onSelectStart/End and buildController from https://github.com/mrdoob/three.js/blob/dev/examples/webxr_vr_ballshooter.html
 function onSelectStart() {
     this.userData.isSelecting = true;
+    selectObjectVR(this.position, this.quaternion);
 }
 
 function onSelectEnd() {
@@ -55,13 +56,14 @@ function buildController( data ) {
 // declare controllers: https://github.com/mrdoob/three.js/blob/master/examples/webxr_vr_ballshooter.html#L24
 let controller1, controller2;
 let controllerGrip1, controllerGrip2;
+let controlRay1, controlRay2;
 
 controller1 = renderer.xr.getController(0);
 controller1.addEventListener( 'selectstart', onSelectStart );
 controller1.addEventListener( 'selectend', onSelectEnd );
 controller1.addEventListener( 'connected', function ( event ) {
-
-    this.add( buildController( event.data ) );
+    controlRay1 = buildController( event.data );
+    this.add( controlRay1 );
 
 } );
 controller1.addEventListener( 'disconnected', function () {
@@ -75,8 +77,8 @@ controller2 = renderer.xr.getController( 1 );
 controller2.addEventListener( 'selectstart', onSelectStart );
 controller2.addEventListener( 'selectend', onSelectEnd );
 controller2.addEventListener( 'connected', function ( event ) {
-
-    this.add( buildController( event.data ) );
+    controlRay2 = buildController( event.data )
+    this.add( controlRay2 );
 
 } );
 controller2.addEventListener( 'disconnected', function () {
@@ -187,15 +189,9 @@ let selected;
 // white wireframe of selected
 let selectedOutline;
 // selects objects in the scene when a user clicks on them
-renderer.domElement.addEventListener('mousedown', (e) => {
-    // ignore if right mouse button was pressed
-    if (e.button == 2) {
-        return;
-    }
+function selectObject() {
     // removing the grid might help with raycasting
     scene.remove(gridHelper);
-    // with help from https://threejs.org/docs/#api/en/core/Raycaster
-    raycaster.setFromCamera(mousePos, camera);
     let intersects = raycaster.intersectObjects(scene.children);
     // if nothing is hit, remove selectedOutline, detach the controls, and add back gridHelper
     if (intersects.length == 0)
@@ -238,7 +234,25 @@ renderer.domElement.addEventListener('mousedown', (e) => {
     }
     // add back the grid no matter what happens
     scene.add(gridHelper);
-})
+}
+
+function selectObjectVR(controlPosition, controlRotation) {
+    raycaster.set(controlPosition, new THREE.Vector3(0, 0, -1).applyQuaternion(controlRotation));
+    selectObject();
+}
+
+function selectObject2D(e) {
+    // ignore if right mouse button was pressed
+    if (e.button == 2) {
+        return;
+    }
+    // with help from https://threejs.org/docs/#api/en/core/Raycaster
+    raycaster.setFromCamera(mousePos, camera);
+    selectObject();
+
+}
+
+renderer.domElement.addEventListener('mousedown', selectObject2D);
 
 window.addEventListener('keydown', (e) => {
     moveCamera(e);
