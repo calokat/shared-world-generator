@@ -1,7 +1,7 @@
 // https://github.com/mrdoob/three.js/blob/dev/build/three.module.js
 import * as THREE from '/three.module.js';
 // From https://discourse.threejs.org/t/transformcontrols-rotation-is-not-working/7519/5
-import {TransformControls} from '/TransformControls.js';
+import {VRTransformControls} from '/VRTransformControls.js';
 import SessionHandler from '/SessionHandler.js';
 import {XRControllerModelFactory} from '/XRControllerModelFactory.js';
 // set up the scene, camera, and renderer
@@ -120,7 +120,24 @@ let raycaster = new THREE.Raycaster();
 let mouseMovement = new THREE.Vector2();
 let mousePos = new THREE.Vector2();
 
-let controls = new TransformControls(camera, renderer.domElement);
+let controls = new VRTransformControls(camera, renderer.domElement, controller1, controller2);
+const transformModes = ['translate', 'rotate', 'scale'];
+let transformModeIndex = 0;
+
+let onGrip = (event) => {
+    if (!controls.visible) {
+        return;
+    }
+    transformModeIndex += 1;
+    if (transformModeIndex === transformModes.length) {
+        transformModeIndex = 0;
+    }
+    controls.mode =transformModes[transformModeIndex];
+};
+
+controller1.addEventListener('squeezestart', onGrip);
+controller2.addEventListener('squeezestart', onGrip);
+
 controls.name = "TransformControls";
 // the TransformControls only show up when attached to an object
 scene.add(controls);
@@ -232,6 +249,17 @@ function selectObject() {
             break;
         }
     }
+    intersects = intersects.filter((i) => {
+        return i.object == selected;
+    })
+    if (intersects.length === 0 && !controls.axis) {
+        selected = null;
+        scene.remove(selectedOutline);
+        selectedOutline = null;
+        controls.detach();
+        scene.add(gridHelper);
+        return;
+    }
     // add back the grid no matter what happens
     scene.add(gridHelper);
 }
@@ -268,12 +296,15 @@ window.addEventListener('keydown', (e) => {
             break;
         case 'w':
             controls.mode = "translate";
+            transformModeIndex = 0;
             break;
         case 'e':
             controls.mode = "rotate";
+            transformModeIndex = 1;
             break;
         case 'r':
             controls.mode = "scale";
+            transformModeIndex = 2;
             break;
     }
 })
