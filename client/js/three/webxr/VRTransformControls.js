@@ -25,11 +25,11 @@ import {
 	Vector3
 } from "/three.module.js";
 
-var TransformControls = function ( camera, domElement ) {
+var VRTransformControls = function ( camera, domElement, controller1, controller2 ) {
 
 	if ( domElement === undefined ) {
 
-		console.warn( 'THREE.TransformControls: The second parameter "domElement" is now mandatory.' );
+		console.warn( 'THREE.VRTransformControls: The second parameter "domElement" is now mandatory.' );
 		domElement = document;
 
 	}
@@ -115,6 +115,8 @@ var TransformControls = function ( camera, domElement ) {
 	var positionStart = new Vector3();
 	var quaternionStart = new Quaternion();
 	var scaleStart = new Vector3();
+
+	var activeController;
 
 	// TODO: remove properties unused in plane and gizmo
 
@@ -232,7 +234,7 @@ var TransformControls = function ( camera, domElement ) {
 
 			if ( this.object.parent === null ) {
 
-				console.error( 'TransformControls: The attached 3D object must be a part of the scene graph.' );
+				console.error( 'VRTransformControls: The attached 3D object must be a part of the scene graph.' );
 
 			} else {
 
@@ -275,6 +277,38 @@ var TransformControls = function ( camera, domElement ) {
 		}
 
 	};
+
+	this.setActiveController = function(event) {
+		if (activeController === this) return;
+		// activeController.removeEventListener('selectstart', );
+		activeController = this;
+		// activeController.addEventListener('selectstart', )
+	};
+
+	controller1.addEventListener('selectstart', this.setActiveController);
+	controller2.addEventListener('selectstart', this.setActiveController);
+
+	this.vrControllerHover = function () {
+		requestAnimationFrame(scope.vrControllerHover);
+		if (!activeController) return;
+
+		ray.set(activeController.position, new Vector3(0, 0, -1).applyQuaternion(activeController.quaternion));
+
+		let intersect = ray.intersectObjects( _gizmo.picker[ scope.mode ].children, true )[ 0 ] || false;
+
+		if ( intersect ) {
+
+			scope.axis = intersect.object.name;
+
+		} else {
+
+			scope.axis = null;
+
+		}
+	};
+
+	requestAnimationFrame(this.vrControllerHover);
+
 
 	this.pointerDown = function ( pointer ) {
 
@@ -328,6 +362,54 @@ var TransformControls = function ( camera, domElement ) {
 			this.dispatchEvent( mouseDownEvent );
 
 		}
+
+	};
+
+	this.vrControllerSelect = function () {
+		if (!activeController) return;
+
+		ray.set(activeController.position, new Vector3(0, 0, -1).applyQuaternion(activeController.rotation));
+
+		var planeIntersect = ray.intersectObjects( [ _plane ], true )[ 0 ] || false;
+
+		if ( planeIntersect ) {
+
+			var space = this.space;
+
+			if ( this.mode === 'scale' ) {
+
+				space = 'local';
+
+			} else if ( this.axis === 'E' || this.axis === 'XYZE' || this.axis === 'XYZ' ) {
+
+				space = 'world';
+
+			}
+
+			if ( space === 'local' && this.mode === 'rotate' ) {
+
+				var snap = this.rotationSnap;
+
+				if ( this.axis === 'X' && snap ) this.object.rotation.x = Math.round( this.object.rotation.x / snap ) * snap;
+				if ( this.axis === 'Y' && snap ) this.object.rotation.y = Math.round( this.object.rotation.y / snap ) * snap;
+				if ( this.axis === 'Z' && snap ) this.object.rotation.z = Math.round( this.object.rotation.z / snap ) * snap;
+
+			}
+
+			this.object.updateMatrixWorld();
+			this.object.parent.updateMatrixWorld();
+
+			positionStart.copy( this.object.position );
+			quaternionStart.copy( this.object.quaternion );
+			scaleStart.copy( this.object.scale );
+
+			this.object.matrixWorld.decompose( worldPositionStart, worldQuaternionStart, worldScaleStart );
+
+			pointStart.copy( planeIntersect.point ).sub( worldPositionStart );
+
+		}
+
+		this.dragging = true;
 
 	};
 
@@ -716,9 +798,9 @@ var TransformControls = function ( camera, domElement ) {
 
 };
 
-TransformControls.prototype = Object.assign( Object.create( Object3D.prototype ), {
+VRTransformControls.prototype = Object.assign( Object.create( Object3D.prototype ), {
 
-	constructor: TransformControls,
+	constructor: VRTransformControls,
 
 	isTransformControls: true
 
@@ -1652,4 +1734,4 @@ TransformControlsPlane.prototype = Object.assign( Object.create( Mesh.prototype 
 
 } );
 
-export { TransformControls, TransformControlsGizmo, TransformControlsPlane };
+export { VRTransformControls, TransformControlsGizmo, TransformControlsPlane };
