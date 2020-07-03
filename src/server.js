@@ -35,7 +35,10 @@ const onRequest = (request, response) => {
     case '/TransformControls.js':
       fileHandler.getTransformControlsJs(request, response);
       break;
-    case '/404':
+    case '/VRTransformControls.js':
+      fileHandler.getVRTransformControlsJs(request, response);
+      break;
+      case '/404':
       fileHandler.get404(request, response);
       break;
     case '/VRButton.js':

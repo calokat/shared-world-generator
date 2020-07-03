@@ -7,6 +7,7 @@ const clientJs = fs.readFileSync(`${__dirname}/../client/js/index.js`);
 const threeJs = fs.readFileSync(`${__dirname}/../client/js/three/build/three.module.js`);
 const engineJs = fs.readFileSync(`${__dirname}/../client/js/engine.js`);
 const transformControlsJs = fs.readFileSync(`${__dirname}/../client/js/three/controls/TransformControls.js`);
+const vrTransformControlsJs = fs.readFileSync(`${__dirname}/../client/js/three/webxr/VRTransformControls.js`);
 const error404 = fs.readFileSync(`${__dirname}/../client/404.html`);
 const VRButton = fs.readFileSync(`${__dirname}/../client/js/three/webxr/VRButton.js`);
 const pointerLockControls = fs.readFileSync(`${__dirname}/../client/js/three/controls/PointerLockControls.js`);
@@ -43,6 +44,9 @@ const getEngineJs = (request, response) => {
 const getTransformControlsJs = (request, response) => {
   writeResponse(request, response, transformControlsJs, 'application/javascript');
 };
+const getVRTransformControlsJs = (request, response) => {
+  writeResponse(request, response, vrTransformControlsJs, 'application/javascript');
+};
 const get404 = (request, response) => {
   writeResponse(request, response, error404, 'text/html');
 };
@@ -75,6 +79,7 @@ module.exports = {
   getThreeJs,
   getEngineJs,
   getTransformControlsJs,
+  getVRTransformControlsJs,
   get404,
   getVRButton,
   getPointerLockControls,
