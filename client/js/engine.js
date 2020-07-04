@@ -97,8 +97,11 @@ scene.add( controllerGrip1 );
 controllerGrip2 = renderer.xr.getControllerGrip( 1 );
 controllerGrip2.add( controllerModelFactory.createControllerModel( controllerGrip2 ) );
 scene.add( controllerGrip2 );
+let delta;
+let clock = new THREE.Clock();
 // basic update loop
 function animate() {
+    delta = clock.getDelta();
     renderer.render( scene, camera );
 }
 var _sessionHandler = new SessionHandler(renderer, camera);
@@ -161,16 +164,16 @@ function moveCamera(e){
     camera.getWorldDirection(cameraFwd);
     cameraRight.applyQuaternion(camera.quaternion);
     if (e.key == "w"){
-        camera.position.add(cameraFwd.multiplyScalar(.1));
+        camera.position.add(cameraFwd.multiplyScalar(delta * 2));
     }
     if (e.key == "s"){
-        camera.position.add(cameraFwd.multiplyScalar(-.1));
+        camera.position.add(cameraFwd.multiplyScalar(-delta * 2));
     }
     if (e.key == "a"){
-        camera.position.add(cameraRight.multiplyScalar(-.1));
+        camera.position.add(cameraRight.multiplyScalar(-delta * 2));
     }
     if (e.key == "d"){
-        camera.position.add(cameraRight.multiplyScalar(.1));
+        camera.position.add(cameraRight.multiplyScalar(delta * 2));
     }
 }
 
