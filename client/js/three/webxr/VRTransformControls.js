@@ -68,6 +68,7 @@ var VRTransformControls = function ( camera, domElement, controller1, controller
 
 	var changeEvent = { type: "change" };
 	var mouseDownEvent = { type: "mouseDown" };
+	var vrControllerDownEvent = { type: "vrControllerDown" };
 	var mouseUpEvent = { type: "mouseUp", mode: scope.mode };
 	var objectChangeEvent = { type: "objectChange" };
 
@@ -135,6 +136,7 @@ var VRTransformControls = function ( camera, domElement, controller1, controller
 	{
 
 		domElement.addEventListener( "mousedown", onPointerDown, false );
+		// domElement.addEventListener( "vrcontrollerdown", onVRControllerSelect)
 		domElement.addEventListener( "touchstart", onPointerDown, false );
 		domElement.addEventListener( "mousemove", onPointerHover, false );
 		domElement.addEventListener( "touchmove", onPointerHover, false );
@@ -278,16 +280,6 @@ var VRTransformControls = function ( camera, domElement, controller1, controller
 
 	};
 
-	this.setActiveController = function(event) {
-		if (activeController === this) return;
-		// activeController.removeEventListener('selectstart', );
-		activeController = this;
-		// activeController.addEventListener('selectstart', )
-	};
-
-	controller1.addEventListener('selectstart', this.setActiveController);
-	controller2.addEventListener('selectstart', this.setActiveController);
-
 	this.vrControllerHover = function () {
 		requestAnimationFrame(scope.vrControllerHover);
 		if (!activeController) return;
@@ -309,6 +301,19 @@ var VRTransformControls = function ( camera, domElement, controller1, controller
 
 	requestAnimationFrame(this.vrControllerHover);
 
+	this.setActiveController = function(event) {
+		if (activeController === this) return;
+		if (activeController) {
+			activeController.removeEventListener('selectstart', onVRControllerSelect);
+			activeController.removeEventListener('selectend', onVRControllerDeselect);	
+		}
+		activeController = this;
+		activeController.addEventListener('selectstart', onVRControllerSelect)
+		activeController.addEventListener('selectend', onVRControllerDeselect);
+	};
+
+	controller1.addEventListener('selectstart', this.setActiveController);
+	controller2.addEventListener('selectstart', this.setActiveController);
 
 	this.pointerDown = function ( pointer ) {
 
@@ -368,49 +373,50 @@ var VRTransformControls = function ( camera, domElement, controller1, controller
 	this.vrControllerSelect = function () {
 		if (!activeController) return;
 
-		ray.set(activeController.position, new Vector3(0, 0, -1).applyQuaternion(activeController.rotation));
+		ray.set(activeController.position, new Vector3(0, 0, -1).applyQuaternion(activeController.quaternion));
 
 		var planeIntersect = ray.intersectObjects( [ _plane ], true )[ 0 ] || false;
 
 		if ( planeIntersect ) {
 
-			var space = this.space;
+			var space = scope.space;
 
-			if ( this.mode === 'scale' ) {
+			if ( scope.mode === 'scale' ) {
 
 				space = 'local';
 
-			} else if ( this.axis === 'E' || this.axis === 'XYZE' || this.axis === 'XYZ' ) {
+			} else if ( scope.axis === 'E' || scope.axis === 'XYZE' || scope.axis === 'XYZ' ) {
 
 				space = 'world';
 
 			}
 
-			if ( space === 'local' && this.mode === 'rotate' ) {
+			if ( space === 'local' && scope.mode === 'rotate' ) {
 
-				var snap = this.rotationSnap;
+				var snap = scope.rotationSnap;
 
-				if ( this.axis === 'X' && snap ) this.object.rotation.x = Math.round( this.object.rotation.x / snap ) * snap;
-				if ( this.axis === 'Y' && snap ) this.object.rotation.y = Math.round( this.object.rotation.y / snap ) * snap;
-				if ( this.axis === 'Z' && snap ) this.object.rotation.z = Math.round( this.object.rotation.z / snap ) * snap;
+				if ( scope.axis === 'X' && snap ) scope.object.rotation.x = Math.round( scope.object.rotation.x / snap ) * snap;
+				if ( scope.axis === 'Y' && snap ) scope.object.rotation.y = Math.round( scope.object.rotation.y / snap ) * snap;
+				if ( scope.axis === 'Z' && snap ) scope.object.rotation.z = Math.round( scope.object.rotation.z / snap ) * snap;
 
 			}
 
-			this.object.updateMatrixWorld();
-			this.object.parent.updateMatrixWorld();
+			scope.object.updateMatrixWorld();
+			scope.object.parent.updateMatrixWorld();
 
-			positionStart.copy( this.object.position );
-			quaternionStart.copy( this.object.quaternion );
-			scaleStart.copy( this.object.scale );
+			positionStart.copy( scope.object.position );
+			quaternionStart.copy( scope.object.quaternion );
+			scaleStart.copy( scope.object.scale );
 
-			this.object.matrixWorld.decompose( worldPositionStart, worldQuaternionStart, worldScaleStart );
+			scope.object.matrixWorld.decompose( worldPositionStart, worldQuaternionStart, worldScaleStart );
 
 			pointStart.copy( planeIntersect.point ).sub( worldPositionStart );
 
 		}
 
-		this.dragging = true;
-
+		scope.dragging = true;
+		// vrControllerDownEvent.mode = this.mode;
+		// dispatchEvent( vrControllerDownEvent );
 	};
 
 	this.pointerMove = function ( pointer ) {
@@ -662,6 +668,256 @@ var VRTransformControls = function ( camera, domElement, controller1, controller
 
 	};
 
+	this.vrControllerMove = function ( pointer ) {
+		vrControllerSelectAnimHandle = requestAnimationFrame(scope.vrControllerMove);
+		var axis = scope.axis;
+		var mode = scope.mode;
+		var object = scope.object;
+		var space = scope.space;
+
+		if ( mode === 'scale' ) {
+
+			space = 'local';
+
+		} else if ( axis === 'E' || axis === 'XYZE' || axis === 'XYZ' ) {
+
+			space = 'world';
+
+		}
+
+		if ( object === undefined || axis === null || scope.dragging === false || ( pointer.button !== undefined && pointer.button !== 0 ) ) return;
+
+		ray.set( activeController.position, new Vector3(0, 0, -1).applyQuaternion(activeController.quaternion) );
+
+		var planeIntersect = ray.intersectObjects( [ _plane ], true )[ 0 ] || false;
+
+		if ( planeIntersect === false ) return;
+
+		pointEnd.copy( planeIntersect.point ).sub( worldPositionStart );
+
+		if ( mode === 'translate' ) {
+
+			// Apply translate
+
+			offset.copy( pointEnd ).sub( pointStart );
+
+			if ( space === 'local' && axis !== 'XYZ' ) {
+
+				offset.applyQuaternion( worldQuaternionInv );
+
+			}
+
+			if ( axis.indexOf( 'X' ) === - 1 ) offset.x = 0;
+			if ( axis.indexOf( 'Y' ) === - 1 ) offset.y = 0;
+			if ( axis.indexOf( 'Z' ) === - 1 ) offset.z = 0;
+
+			if ( space === 'local' && axis !== 'XYZ' ) {
+
+				offset.applyQuaternion( quaternionStart ).divide( parentScale );
+
+			} else {
+
+				offset.applyQuaternion( parentQuaternionInv ).divide( parentScale );
+
+			}
+
+			object.position.copy( offset ).add( positionStart );
+
+			// Apply translation snap
+
+			if ( scope.translationSnap ) {
+
+				if ( space === 'local' ) {
+
+					object.position.applyQuaternion( _tempQuaternion.copy( quaternionStart ).inverse() );
+
+					if ( axis.search( 'X' ) !== - 1 ) {
+
+						object.position.x = Math.round( object.position.x / scope.translationSnap ) * scope.translationSnap;
+
+					}
+
+					if ( axis.search( 'Y' ) !== - 1 ) {
+
+						object.position.y = Math.round( object.position.y / scope.translationSnap ) * scope.translationSnap;
+
+					}
+
+					if ( axis.search( 'Z' ) !== - 1 ) {
+
+						object.position.z = Math.round( object.position.z / scope.translationSnap ) * scope.translationSnap;
+
+					}
+
+					object.position.applyQuaternion( quaternionStart );
+
+				}
+
+				if ( space === 'world' ) {
+
+					if ( object.parent ) {
+
+						object.position.add( _tempVector.setFromMatrixPosition( object.parent.matrixWorld ) );
+
+					}
+
+					if ( axis.search( 'X' ) !== - 1 ) {
+
+						object.position.x = Math.round( object.position.x / scope.translationSnap ) * scope.translationSnap;
+
+					}
+
+					if ( axis.search( 'Y' ) !== - 1 ) {
+
+						object.position.y = Math.round( object.position.y / scope.translationSnap ) * scope.translationSnap;
+
+					}
+
+					if ( axis.search( 'Z' ) !== - 1 ) {
+
+						object.position.z = Math.round( object.position.z / scope.translationSnap ) * scope.translationSnap;
+
+					}
+
+					if ( object.parent ) {
+
+						object.position.sub( _tempVector.setFromMatrixPosition( object.parent.matrixWorld ) );
+
+					}
+
+				}
+
+			}
+
+		} else if ( mode === 'scale' ) {
+
+			if ( axis.search( 'XYZ' ) !== - 1 ) {
+
+				var d = pointEnd.length() / pointStart.length();
+
+				if ( pointEnd.dot( pointStart ) < 0 ) d *= - 1;
+
+				_tempVector2.set( d, d, d );
+
+			} else {
+
+				_tempVector.copy( pointStart );
+				_tempVector2.copy( pointEnd );
+
+				_tempVector.applyQuaternion( worldQuaternionInv );
+				_tempVector2.applyQuaternion( worldQuaternionInv );
+
+				_tempVector2.divide( _tempVector );
+
+				if ( axis.search( 'X' ) === - 1 ) {
+
+					_tempVector2.x = 1;
+
+				}
+				if ( axis.search( 'Y' ) === - 1 ) {
+
+					_tempVector2.y = 1;
+
+				}
+				if ( axis.search( 'Z' ) === - 1 ) {
+
+					_tempVector2.z = 1;
+
+				}
+
+			}
+
+			// Apply scale
+
+			object.scale.copy( scaleStart ).multiply( _tempVector2 );
+
+			if ( scope.scaleSnap ) {
+
+				if ( axis.search( 'X' ) !== - 1 ) {
+
+					object.scale.x = Math.round( object.scale.x / scope.scaleSnap ) * scope.scaleSnap || scope.scaleSnap;
+
+				}
+
+				if ( axis.search( 'Y' ) !== - 1 ) {
+
+					object.scale.y = Math.round( object.scale.y / scope.scaleSnap ) * scope.scaleSnap || scope.scaleSnap;
+
+				}
+
+				if ( axis.search( 'Z' ) !== - 1 ) {
+
+					object.scale.z = Math.round( object.scale.z / scope.scaleSnap ) * scope.scaleSnap || scope.scaleSnap;
+
+				}
+
+			}
+
+		} else if ( mode === 'rotate' ) {
+
+			offset.copy( pointEnd ).sub( pointStart );
+
+			var ROTATION_SPEED = 20 / worldPosition.distanceTo( _tempVector.setFromMatrixPosition( scope.camera.matrixWorld ) );
+
+			if ( axis === 'E' ) {
+
+				rotationAxis.copy( eye );
+				rotationAngle = pointEnd.angleTo( pointStart );
+
+				startNorm.copy( pointStart ).normalize();
+				endNorm.copy( pointEnd ).normalize();
+
+				rotationAngle *= ( endNorm.cross( startNorm ).dot( eye ) < 0 ? 1 : - 1 );
+
+			} else if ( axis === 'XYZE' ) {
+
+				rotationAxis.copy( offset ).cross( eye ).normalize();
+				rotationAngle = offset.dot( _tempVector.copy( rotationAxis ).cross( scope.eye ) ) * ROTATION_SPEED;
+
+			} else if ( axis === 'X' || axis === 'Y' || axis === 'Z' ) {
+
+				rotationAxis.copy( _unit[ axis ] );
+
+				_tempVector.copy( _unit[ axis ] );
+
+				if ( space === 'local' ) {
+
+					_tempVector.applyQuaternion( worldQuaternion );
+
+				}
+
+				rotationAngle = offset.dot( _tempVector.cross( eye ).normalize() ) * ROTATION_SPEED;
+
+			}
+
+			// Apply rotation snap
+
+			if ( scope.rotationSnap ) rotationAngle = Math.round( rotationAngle / scope.rotationSnap ) * scope.rotationSnap;
+
+			scope.rotationAngle = rotationAngle;
+
+			// Apply rotate
+			if ( space === 'local' && axis !== 'E' && axis !== 'XYZE' ) {
+
+				object.quaternion.copy( quaternionStart );
+				object.quaternion.multiply( _tempQuaternion.setFromAxisAngle( rotationAxis, rotationAngle ) ).normalize();
+
+			} else {
+
+				rotationAxis.applyQuaternion( parentQuaternionInv );
+				object.quaternion.copy( _tempQuaternion.setFromAxisAngle( rotationAxis, rotationAngle ) );
+				object.quaternion.multiply( quaternionStart ).normalize();
+
+			}
+
+		}
+
+		scope.dispatchEvent( changeEvent );
+		scope.dispatchEvent( objectChangeEvent );
+
+	};
+
+
 	this.pointerUp = function ( pointer ) {
 
 		if ( pointer.button !== undefined && pointer.button !== 0 ) return;
@@ -678,6 +934,17 @@ var VRTransformControls = function ( camera, domElement, controller1, controller
 		if ( pointer.button === undefined ) this.axis = null;
 
 	};
+
+	this.vrControllerDeselect = function() {
+		if ( this.dragging && ( this.axis !== null ) ) {
+
+			mouseUpEvent.mode = this.mode;
+			this.dispatchEvent( mouseUpEvent );
+
+		}
+
+		this.dragging = false;
+	}
 
 	// normalize mouse / touch pointer and remap {x,y} to view space.
 
@@ -728,6 +995,18 @@ var VRTransformControls = function ( camera, domElement, controller1, controller
 
 	}
 
+
+	function onVRControllerSelect() {
+
+		vrControllerSelectAnimHandle = requestAnimationFrame(scope.vrControllerMove);
+
+		if ( ! scope.enabled ) return;		
+
+		scope.vrControllerHover();
+		scope.vrControllerSelect();
+	}
+
+
 	function onPointerMove( event ) {
 
 		if ( ! scope.enabled ) return;
@@ -745,6 +1024,17 @@ var VRTransformControls = function ( camera, domElement, controller1, controller
 		scope.pointerUp( getPointer( event ) );
 
 	}
+
+	var vrControllerSelectAnimHandle;
+
+	function onVRControllerDeselect() {
+		if ( ! scope.enabled ) return;
+
+		cancelAnimationFrame(vrControllerSelectAnimHandle);
+
+		scope.vrControllerDeselect();
+	}
+
 
 	// TODO: deprecate
 
