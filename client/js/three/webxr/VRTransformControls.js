@@ -282,8 +282,8 @@ var VRTransformControls = function ( camera, domElement, controller1, controller
 
 	this.vrControllerHover = function () {
 		requestAnimationFrame(scope.vrControllerHover);
-		if (!activeController) return;
-
+		if (!activeController || scope.object === undefined || scope.dragging) return;
+		
 		ray.set(activeController.position, new Vector3(0, 0, -1).applyQuaternion(activeController.quaternion));
 
 		let intersect = ray.intersectObjects( _gizmo.picker[ scope.mode ].children, true )[ 0 ] || false;
