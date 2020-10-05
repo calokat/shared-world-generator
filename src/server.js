@@ -1,8 +1,11 @@
 const https = require('https');
+const http = require('http');
 const url = require('url');
 const fileHandler = require('./fileHandler');
 const sceneHandler = require('./sceneHandler');
 const fs = require('fs');
+const dotenv = require("dotenv");
+let resultOfEnv = dotenv.config({path: "C:/Users/caleb/Documents/GitHub/430-Project1/.env"});
 const port = process.env.PORT || process.env.NODE_PORT || 3000;
 
 const onRequest = (request, response) => {
@@ -65,9 +68,15 @@ const onRequest = (request, response) => {
   }
 };
 
-const options = {
-  key: fs.readFileSync(`${__dirname}/../key.pem`),
-  cert: fs.readFileSync(`${__dirname}/../cert.pem`)
-};
-
-https.createServer(options, onRequest).listen(port);
+if (process.env.NODE_ENV == "production")
+{
+  http.createServer(onRequest).listen(port);
+}
+else 
+{
+  const options = {
+    key: fs.readFileSync(`${__dirname}/../key.pem`),
+    cert: fs.readFileSync(`${__dirname}/../cert.pem`)
+  };
+  https.createServer(options, onRequest).listen(port);  
+}
