@@ -163,17 +163,18 @@ function moveCamera(e){
     let cameraRight = new THREE.Vector3(1, 0, 0);
     camera.getWorldDirection(cameraFwd);
     cameraRight.applyQuaternion(camera.quaternion);
+    const cameraSpeed = 10;
     if (e.key == "w"){
-        camera.position.add(cameraFwd.multiplyScalar(delta * 2));
+        camera.position.add(cameraFwd.multiplyScalar(delta * cameraSpeed));
     }
     if (e.key == "s"){
-        camera.position.add(cameraFwd.multiplyScalar(-delta * 2));
+        camera.position.add(cameraFwd.multiplyScalar(-delta * cameraSpeed));
     }
     if (e.key == "a"){
-        camera.position.add(cameraRight.multiplyScalar(-delta * 2));
+        camera.position.add(cameraRight.multiplyScalar(-delta * cameraSpeed));
     }
     if (e.key == "d"){
-        camera.position.add(cameraRight.multiplyScalar(delta * 2));
+        camera.position.add(cameraRight.multiplyScalar(delta * cameraSpeed));
     }
 }
 
