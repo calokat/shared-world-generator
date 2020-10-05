@@ -20,6 +20,7 @@
     "eslint-plugin-react-hooks": "^1.7.0"
   },
   "dependencies": {
+    "dotenv": "^8.2.0",
     "shortid": "^2.2.15"
   }
 }
