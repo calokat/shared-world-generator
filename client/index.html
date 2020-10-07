@@ -19,9 +19,12 @@
             <button class="btn btn-primary" id="newWorld">Create world</button>
             <p>or</p>
             <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">Enter existing world</span>
+                </div>
                 <input type="text" class="form-control" id="idField" placeholder="demo" value="demo">
                 <div class="input-group-append">
-                    <button class="btn btn-primary" id="enterWorld">Enter world</button>
+                    <button class="btn btn-primary" id="enterWorld">Enter</button>
                 </div>
             </div>
             <p style="color: red; visibility: hidden;" id = "error">Error: Scene not found</p>
