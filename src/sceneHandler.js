@@ -21,6 +21,11 @@ const getNewId = (request, response) => {
   scenes[newID] = '[]';
   writeResponse(request, response, 200, 'text/plain', newID);
 };
+
+const queryScene = (scene) => {
+  return !!scenes[id]
+}
+
 // gets a scene from the scenes object by using the id param
 // in the query as a key
 const getScene = (request, response) => {
@@ -31,8 +36,7 @@ const getScene = (request, response) => {
   const query = request.url.split('?')[1];
   const params = queryString.decode(query);
   const sceneId = params.id;
-  const scene = scenes[sceneId];
-  if (scene) {
+  if (queryScene(sceneId)) {
     writeResponse(request, response, 200, 'application/json', scene);
   } else {
     writeResponse(request, response, 404, 'application/json', '{"exists": "false"}');
@@ -74,4 +78,5 @@ module.exports = {
   getNewId,
   addOrUpdateScene,
   getScene,
+  queryScene,
 };
