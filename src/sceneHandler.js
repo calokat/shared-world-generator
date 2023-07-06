@@ -23,7 +23,7 @@ const getNewId = (request, response) => {
 };
 
 const queryScene = (scene) => {
-  return !!scenes[id]
+  return !!scenes[scene]
 }
 
 // gets a scene from the scenes object by using the id param
