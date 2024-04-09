@@ -37,7 +37,7 @@ const getScene = (request, response) => {
   const params = queryString.decode(query);
   const sceneId = params.id;
   if (queryScene(sceneId)) {
-    writeResponse(request, response, 200, 'application/json', scene);
+    writeResponse(request, response, 200, 'application/json', scenes[sceneId]);
   } else {
     writeResponse(request, response, 404, 'application/json', '{"exists": "false"}');
   }
