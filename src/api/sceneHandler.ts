@@ -1,8 +1,9 @@
 import { nanoid } from "nanoid";
 import { decode } from "querystring";
 import http, { RequestListener } from "http";
-// the storage for the api
-const scenes: Record<string, string> = {};
+import { createClient } from "redis";
+
+const redisClient = createClient().connect();
 
 const writeResponse = (
   request: http.IncomingMessage,
@@ -19,21 +20,19 @@ const writeResponse = (
 };
 
 // sends a new id with shortid
-const getNewId: http.RequestListener = (request, response) => {
-  console.log("getNewId()");
+const getNewId: http.RequestListener = async (request, response) => {
   if (request.headers.accept !== "text/plain") {
     writeResponse(request, response, 400, "text/plain", "Bad Request");
     return;
   }
-  console.log("getNewId(): request valid");
   const newID = nanoid();
-  scenes[newID] = "[]";
+  (await redisClient).set(newID, "[]");
   writeResponse(request, response, 200, "text/plain", newID);
-  console.log("getNewId(): nanoid: ", newID);
 };
 
-const queryScene = (scene: string): boolean => {
-  return !!scenes[scene];
+const queryScene = async (scene: string): Promise<boolean> => {
+  const foundScene = await (await redisClient).get(scene);
+  return foundScene !== null;
 };
 
 const writeBadRequest: RequestListener = (request, response) => {
@@ -48,7 +47,7 @@ const writeBadRequest: RequestListener = (request, response) => {
 
 // gets a scene from the scenes object by using the id param
 // in the query as a key
-const getScene: http.RequestListener = (request, response) => {
+const getScene: http.RequestListener = async (request, response) => {
   if (
     request.headers.accept !== "application/json" ||
     request.url === undefined
@@ -63,8 +62,9 @@ const getScene: http.RequestListener = (request, response) => {
     writeBadRequest(request, response);
     return;
   }
-  if (queryScene(sceneId)) {
-    writeResponse(request, response, 200, "application/json", scenes[sceneId]);
+  const scene = await (await redisClient).get(sceneId);
+  if (scene !== null) {
+    writeResponse(request, response, 200, "application/json", scene);
   } else {
     writeResponse(
       request,
@@ -82,7 +82,7 @@ const addOrUpdateScene: http.RequestListener = (request, response) => {
     .on("data", (chunk) => {
       bodyBuffers.push(chunk);
     })
-    .on("end", () => {
+    .on("end", async () => {
       let body = Buffer.concat(bodyBuffers).toString();
       const pairs = body.split("&");
       // id is the first pair, the scene entities are the second
@@ -103,14 +103,15 @@ const addOrUpdateScene: http.RequestListener = (request, response) => {
       let statusCode;
       let message;
       // if the scene exists, send 204. If not, send 201
-      if (scenes[id]) {
+      let sceneData = await (await redisClient).get(id);
+      if (sceneData !== null) {
         statusCode = 204;
         message = "Updated";
       } else {
         statusCode = 201;
         message = "Created";
       }
-      scenes[id] = scene;
+      await (await redisClient).set(id, scene);
       writeResponse(
         request,
         response,

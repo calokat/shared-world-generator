@@ -21,12 +21,11 @@ app.get("/getScene", (req, res) => {
 });
 
 app.get("/new", (req, res) => {
-  console.log("/new called");
   sceneHandler.getNewId(req, res);
 });
 
 app.use(express.static(`${__dirname}/../client`));
 
-const port = process.env.PORT || process.env.NODE_PORT || 3000;
+const port = process.env.PORT || process.env.NODE_PORT || 3001;
 
-app.listen(port);
+export default app;

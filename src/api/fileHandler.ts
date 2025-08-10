@@ -13,7 +13,12 @@ const transformControlsJs = readFileSync(
 );
 const error404 = readFileSync(`${__dirname}/../client/404.html`);
 // generic helper method
-const writeFileResponse = (_request: http.IncomingMessage, response: http.ServerResponse, file: NonSharedBuffer, contentType: string) => {
+const writeFileResponse = (
+  _request: http.IncomingMessage,
+  response: http.ServerResponse,
+  file: NonSharedBuffer,
+  contentType: string
+) => {
   response.writeHead(200, { "Content-Type": contentType });
   response.write(file);
   response.end();
@@ -23,7 +28,7 @@ const getIndex: http.RequestListener = (request, response) => {
   writeFileResponse(request, response, index, "text/html");
 };
 
-const getEngine: http.RequestListener = (request, response) => {
+const getEngine: http.RequestListener = async (request, response) => {
   // gets the scene id from the query string
   const query = request.url?.split("?")[1];
   if (query === undefined) {
@@ -40,7 +45,7 @@ const getEngine: http.RequestListener = (request, response) => {
     sceneHandler.writeBadRequest(request, response);
     return;
   }
-  if (sceneHandler.queryScene(sceneId)) {
+  if (await sceneHandler.queryScene(sceneId)) {
     writeFileResponse(request, response, engine, "text/html");
   } else {
     writeFileResponse(request, response, error404, "text/html");

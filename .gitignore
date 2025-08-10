@@ -58,3 +58,8 @@ typings/
 .env
 
 dist/
+.vercel
+
+.env.development.local
+
+api/
