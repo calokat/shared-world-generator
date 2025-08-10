@@ -21,6 +21,7 @@ app.get("/getScene", (req, res) => {
 });
 
 app.get("/new", (req, res) => {
+  console.log("/new called");
   sceneHandler.getNewId(req, res);
 });
 

@@ -20,13 +20,16 @@ const writeResponse = (
 
 // sends a new id with shortid
 const getNewId: http.RequestListener = (request, response) => {
+  console.log("getNewId()");
   if (request.headers.accept !== "text/plain") {
     writeResponse(request, response, 400, "text/plain", "Bad Request");
     return;
   }
+  console.log("getNewId(): request valid");
   const newID = nanoid();
   scenes[newID] = "[]";
   writeResponse(request, response, 200, "text/plain", newID);
+  console.log("getNewId(): nanoid: ", newID);
 };
 
 const queryScene = (scene: string): boolean => {
@@ -34,19 +37,22 @@ const queryScene = (scene: string): boolean => {
 };
 
 const writeBadRequest: RequestListener = (request, response) => {
-      writeResponse(
-      request,
-      response,
-      400,
-      "application/json",
-      '{"message": "Bad Request"}'
-    );
-} 
+  writeResponse(
+    request,
+    response,
+    400,
+    "application/json",
+    '{"message": "Bad Request"}'
+  );
+};
 
 // gets a scene from the scenes object by using the id param
 // in the query as a key
 const getScene: http.RequestListener = (request, response) => {
-  if (request.headers.accept !== "application/json" || request.url === undefined) {
+  if (
+    request.headers.accept !== "application/json" ||
+    request.url === undefined
+  ) {
     writeBadRequest(request, response);
     return;
   }
@@ -120,5 +126,5 @@ export default {
   addOrUpdateScene,
   getScene,
   queryScene,
-  writeBadRequest
+  writeBadRequest,
 };
