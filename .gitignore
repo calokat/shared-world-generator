@@ -61,5 +61,3 @@ dist/
 .vercel
 
 .env.development.local
-
-api/
