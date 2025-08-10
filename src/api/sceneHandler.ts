@@ -3,7 +3,7 @@ import { decode } from "querystring";
 import http, { RequestListener } from "http";
 import { createClient } from "redis";
 
-const redisClient = createClient().connect();
+const redisClient = createClient({ url: process.env.REDIS_URL }).connect();
 
 const writeResponse = (
   request: http.IncomingMessage,

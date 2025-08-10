@@ -1,7 +1,7 @@
 import { nanoid } from "nanoid";
 import { decode } from "querystring";
 import { createClient } from "redis";
-const redisClient = createClient().connect();
+const redisClient = createClient({ url: process.env.REDIS_URL }).connect();
 const writeResponse = (request, response, status, contentType, message = "") => {
     response.writeHead(status, { "Content-Type": contentType });
     if (request.method !== "HEAD") {
