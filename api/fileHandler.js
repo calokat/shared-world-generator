@@ -1,19 +1,14 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const fs_1 = require("fs");
-const querystring_1 = require("querystring");
-const sceneHandler_js_1 = __importDefault(require("./sceneHandler.js"));
+import { readFileSync } from "fs";
+import { decode } from "querystring";
+import sceneHandler from "./sceneHandler.js";
 // read all of the files
-const index = (0, fs_1.readFileSync)(`${__dirname}/../client/index.html`);
-const engine = (0, fs_1.readFileSync)(`${__dirname}/../client/engine.html`);
-const clientJs = (0, fs_1.readFileSync)(`${__dirname}/../client/js/index.js`);
-const threeJs = (0, fs_1.readFileSync)(`${__dirname}/../client/js/three.module.js`);
-const engineJs = (0, fs_1.readFileSync)(`${__dirname}/../client/js/engine.js`);
-const transformControlsJs = (0, fs_1.readFileSync)(`${__dirname}/../client/js/TransformControls.js`);
-const error404 = (0, fs_1.readFileSync)(`${__dirname}/../client/404.html`);
+const index = readFileSync(`${__dirname}/../client/index.html`);
+const engine = readFileSync(`${__dirname}/../client/engine.html`);
+const clientJs = readFileSync(`${__dirname}/../client/js/index.js`);
+const threeJs = readFileSync(`${__dirname}/../client/js/three.module.js`);
+const engineJs = readFileSync(`${__dirname}/../client/js/engine.js`);
+const transformControlsJs = readFileSync(`${__dirname}/../client/js/TransformControls.js`);
+const error404 = readFileSync(`${__dirname}/../client/404.html`);
 // generic helper method
 const writeFileResponse = (_request, response, file, contentType) => {
     response.writeHead(200, { "Content-Type": contentType });
@@ -30,17 +25,17 @@ const getEngine = async (request, response) => {
         writeFileResponse(request, response, engine, "text/html");
         return;
     }
-    const params = (0, querystring_1.decode)(query);
+    const params = decode(query);
     if (!params) {
         writeFileResponse(request, response, error404, "text/html");
         return;
     }
     const sceneId = params.id;
     if (sceneId === undefined || Array.isArray(sceneId)) {
-        sceneHandler_js_1.default.writeBadRequest(request, response);
+        sceneHandler.writeBadRequest(request, response);
         return;
     }
-    if (await sceneHandler_js_1.default.queryScene(sceneId)) {
+    if (await sceneHandler.queryScene(sceneId)) {
         writeFileResponse(request, response, engine, "text/html");
     }
     else {
@@ -62,7 +57,7 @@ const getTransformControlsJs = (request, response) => {
 const get404 = (request, response) => {
     writeFileResponse(request, response, error404, "text/html");
 };
-exports.default = {
+export default {
     getIndex,
     getEngine,
     getIndexJs,

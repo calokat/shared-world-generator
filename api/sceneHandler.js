@@ -1,9 +1,7 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const nanoid_1 = require("nanoid");
-const querystring_1 = require("querystring");
-const redis_1 = require("redis");
-const redisClient = (0, redis_1.createClient)().connect();
+import { nanoid } from "nanoid";
+import { decode } from "querystring";
+import { createClient } from "redis";
+const redisClient = createClient().connect();
 const writeResponse = (request, response, status, contentType, message = "") => {
     response.writeHead(status, { "Content-Type": contentType });
     if (request.method !== "HEAD") {
@@ -17,7 +15,7 @@ const getNewId = async (request, response) => {
         writeResponse(request, response, 400, "text/plain", "Bad Request");
         return;
     }
-    const newID = (0, nanoid_1.nanoid)();
+    const newID = nanoid();
     (await redisClient).set(newID, "[]");
     writeResponse(request, response, 200, "text/plain", newID);
 };
@@ -37,7 +35,7 @@ const getScene = async (request, response) => {
         return;
     }
     const query = request.url.split("?")[1];
-    const params = (0, querystring_1.decode)(query);
+    const params = decode(query);
     const sceneId = params.id;
     if (sceneId === undefined || Array.isArray(sceneId)) {
         writeBadRequest(request, response);
@@ -85,7 +83,7 @@ const addOrUpdateScene = (request, response) => {
         writeResponse(request, response, statusCode, "application/json", `{"message": "${message}"}`);
     });
 };
-exports.default = {
+export default {
     getNewId,
     addOrUpdateScene,
     getScene,
