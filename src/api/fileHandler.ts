@@ -2,6 +2,12 @@ import { readFileSync } from "fs";
 import { decode } from "querystring";
 import sceneHandler from "./sceneHandler.js";
 import http from "node:http";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 // read all of the files
 const index = readFileSync(`${__dirname}/../client/index.html`);
 const engine = readFileSync(`${__dirname}/../client/engine.html`);
