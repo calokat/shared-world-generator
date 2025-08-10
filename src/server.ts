@@ -24,7 +24,7 @@ app.get("/new", (req, res) => {
   sceneHandler.getNewId(req, res);
 });
 
-app.use(express.static(`${__dirname}/../client/js`));
+app.use(express.static(`${__dirname}/../client`));
 
 const port = process.env.PORT || process.env.NODE_PORT || 3000;
 

@@ -1,5 +1,5 @@
 // https://github.com/mrdoob/three.js/blob/dev/build/three.module.js
-import * as THREE from "/three.module.js";
+import * as THREE from "/js/three.module.js";
 // set up the scene, camera, and renderer
 // From https://threejs.org/docs/index.html#manual/en/introduction/Creating-a-scene
 let scene = new THREE.Scene();
