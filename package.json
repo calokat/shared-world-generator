@@ -4,6 +4,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node ./dist/server.js",
+    "build": "tsc",
     "test": "echo \"Tests complete\"",
     "pretest": "eslint ./src --fix",
     "ts-watch": "tsc --watch"
